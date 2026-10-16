@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>가족 - PetCare</title>
+  <style>
+    * { box-sizing: border-box; }
+    @media (max-width: 768px) { .wrap { margin: 12px; padding: 16px; } }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f6f7f4; margin: 0; color: #243027; }
+    .wrap { max-width: 860px; margin: 24px auto; background: #fff; border-radius: 16px; padding: 24px; }
+    a { color: #3d7a4a; }
+    h1 { margin-top: 0; }
+    .card { border: 1px solid #e4e8e1; border-radius: 12px; padding: 16px; margin: 12px 0; }
+    form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    input, select, button { padding: 8px 10px; border-radius: 8px; border: 1px solid #d5ddd4; }
+    button { background: #3d7a4a; color: white; border: 0; cursor: pointer; }
+    .ghost { background: #eef3ee; color: #243027; }
+    .error { color: #b42318; }
+    code { background: #f3f6f2; padding: 4px 8px; border-radius: 6px; letter-spacing: 1px; }
+    li { margin: 8px 0; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 th:text="${family.name}">가족</h1>
+    <p th:if="${family.description != null}" th:text="${family.description}">설명</p>
+    <a href="/family">가족 목록</a>
+  </header>
+  <p class="error" th:if="${error}" th:text="${error}">오류</p>
+
+  <div class="card">
+    <h2>구성원</h2>
+    <ul>
+      <li th:each="member : ${members}">
+        <span th:text="${member.name}">이름</span>
+        <span th:text="${member.role.name() == 'OWNER'} ? '소유자' : '구성원'">역할</span>
+        <form th:if="${owner and member.role.name() != 'OWNER'}"
+              th:action="@{'/family/' + ${family.id} + '/members/' + ${member.userId} + '/remove'}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <button class="ghost" type="submit">내보내기</button>
+        </form>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card" th:if="${owner}">
+    <h2>초대</h2>
+    <p>코드는 한 명만 사용할 수 있고 7일 뒤 만료됩니다.</p>
+    <form th:action="@{'/family/' + ${family.id} + '/invite'}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <button type="submit">초대 코드 만들기</button>
+    </form>
+    <ul>
+      <li th:each="invite : ${invites}">
+        <code th:text="${invite.code}">CODE</code>
+        <span th:text="${#temporals.format(invite.expiresAt, 'yyyy-MM-dd HH:mm')}">만료</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>공유된 반려동물</h2>
+    <ul>
+      <li th:each="pet : ${sharedPets}">
+        <span th:text="${pet.name}">이름</span>
+        <a th:href="@{'/pets/' + ${pet.id} + '/tasks'}">일정</a>
+        <form th:if="${owner or (pet.user != null and pet.user.id == user.id)}"
+              th:action="@{'/family/' + ${family.id} + '/unshare'}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <input type="hidden" name="petId" th:value="${pet.id}">
+          <button class="ghost" type="submit">공유 해제</button>
+        </form>
+      </li>
+    </ul>
+    <p th:if="${#lists.isEmpty(sharedPets)}">아직 공유된 반려동물이 없습니다.</p>
+    <form th:if="${!#lists.isEmpty(shareablePets)}" th:action="@{'/family/' + ${family.id} + '/share'}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <select name="petId">
+        <option th:each="pet : ${shareablePets}" th:value="${pet.id}" th:text="${pet.name}">이름</option>
+      </select>
+      <button type="submit">이 가족에 공유</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>활동</h2>
+    <ul>
+      <li th:each="log : ${activities}">
+        <span th:text="${#temporals.format(log.createdAt, 'MM-dd HH:mm')}">시간</span>
+        <span th:text="${log.summary}">내용</span>
+      </li>
+    </ul>
+    <p th:if="${#lists.isEmpty(activities)}">아직 기록이 없습니다.</p>
+  </div>
+
+  <form th:if="${!owner}" th:action="@{'/family/' + ${family.id} + '/leave'}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button class="ghost" type="submit">가족 나가기</button>
+  </form>
+  <form th:if="${owner}" th:action="@{'/family/' + ${family.id} + '/delete'}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button class="ghost" type="submit">가족 삭제</button>
+  </form>
+</div>
+</body>
+</html>

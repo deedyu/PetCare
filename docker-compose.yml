@@ -1,0 +1,65 @@
+services:
+  # MySQL 데이터베이스 서비스
+  mysql:
+    image: mysql:8.0
+    container_name: petcare-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD 환경 변수가 없습니다. 프로젝트 루트의 .env 를 확인하세요.}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-petcare}
+      MYSQL_USER: ${MYSQL_USER:?MYSQL_USER 환경 변수가 없습니다. 프로젝트 루트의 .env 를 확인하세요.}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD 환경 변수가 없습니다. 프로젝트 루트의 .env 를 확인하세요.}
+      TZ: Asia/Seoul
+    ports:
+      - "3307:3306"  # 외부 포트를 3307로 변경 (로컬 MySQL과 충돌 방지)
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - petcare-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # PetCare 애플리케이션 서비스
+  petcare-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcare-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/petcare?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:?SPRING_DATASOURCE_USERNAME 환경 변수가 없습니다. 프로젝트 루트의 .env 를 확인하세요.}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?SPRING_DATASOURCE_PASSWORD 환경 변수가 없습니다. 프로젝트 루트의 .env 를 확인하세요.}
+      PETCARE_ADMIN_INITIAL_PASSWORD: ${PETCARE_ADMIN_INITIAL_PASSWORD:?PETCARE_ADMIN_INITIAL_PASSWORD 환경 변수가 없습니다. 프로젝트 루트의 .env 를 확인하세요.}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      SERVER_PORT: 8081
+      TZ: Asia/Seoul
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - petcare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  petcare-network:
+    driver: bridge
+

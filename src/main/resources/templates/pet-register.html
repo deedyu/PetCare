@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반려동물 등록 - 반려동물 To-Do List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .register-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .register-header h1 {
+            color: #555;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .register-header p {
+            color: #999;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #fce4ec;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        .form-group select {
+            cursor: pointer;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #a8e6cf;
+            box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
+        }
+        .emoji-preview {
+            display: inline-block;
+            font-size: 24px;
+            margin-left: 10px;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn-register,
+        .btn-cancel {
+            flex: 1;
+            max-width: 200px;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
+            color: #555;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(168, 230, 207, 0.3);
+        }
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #555;
+        }
+        .btn-cancel:hover {
+            background: #bdbdbd;
+            transform: translateY(-2px);
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #81c784;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link a:hover {
+            color: #f1a8c0;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>🐾 반려동물 등록</h1>
+            <p>새로운 반려동물을 등록해주세요</p>
+        </div>
+        <p th:if="${error}" th:text="${error}" style="color:#b42318; margin-bottom:12px;"></p>
+
+        <form action="/pets" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="form-group">
+                <label for="name">이름</label>
+                <input type="text" id="name" name="name" placeholder="반려동물 이름" required>
+            </div>
+
+            <div class="form-group">
+                <label for="type">종</label>
+                <input type="text" id="type" name="type" placeholder="예: 강아지, 고양이" required>
+            </div>
+
+            <div class="form-group">
+                <label for="age">나이</label>
+                <input type="number" id="age" name="age" placeholder="나이" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="emoji">이모티콘 <span id="emoji-preview" class="emoji-preview"></span></label>
+                <select id="emoji" name="imageUrl" onchange="updateEmojiPreview()">
+                    <option value="">선택 안 함</option>
+                    <option value="🐶">🐶 강아지</option>
+                    <option value="🐱">🐱 고양이</option>
+                    <option value="🐰">🐰 토끼</option>
+                    <option value="🐹">🐹 햄스터</option>
+                    <option value="🐭">🐭 쥐</option>
+                    <option value="🐷">🐷 돼지</option>
+                    <option value="🐨">🐨 코알라</option>
+                    <option value="🐼">🐼 팬더</option>
+                    <option value="🐻">🐻 곰</option>
+                    <option value="🦊">🦊 여우</option>
+                    <option value="🐸">🐸 개구리</option>
+                    <option value="🐢">🐢 거북이</option>
+                    <option value="🐠">🐠 물고기</option>
+                    <option value="🐦">🐦 새</option>
+                    <option value="🦜">🦜 앵무새</option>
+                    <option value="🐴">🐴 말</option>
+                    <option value="🦄">🦄 유니콘</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-register">등록</button>
+                <a href="/" class="btn-cancel" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">취소</a>
+            </div>
+        </form>
+
+        <div class="back-link">
+            <a href="/">메인 페이지로 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        function updateEmojiPreview() {
+            const select = document.getElementById('emoji');
+            const preview = document.getElementById('emoji-preview');
+            if (select.value) {
+                preview.textContent = select.value;
+            } else {
+                preview.textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+

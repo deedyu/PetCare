@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>문의 - PetCare</title>
+  <style>
+    * { box-sizing: border-box; }
+    @media (max-width: 768px) { .wrap { margin: 12px; padding: 16px; } }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f6f7f4; margin: 0; color: #243027; }
+    .wrap { max-width: 820px; margin: 24px auto; background: #fff; border-radius: 16px; padding: 24px; }
+    a { color: #3d7a4a; }
+    ul { padding-left: 18px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>내 문의</h1>
+  <p><a href="/">홈으로</a> · <a href="/inquiries/new">새 문의</a></p>
+  <ul>
+    <li th:each="inquiry : ${inquiries}">
+      <a th:href="@{'/inquiries/' + ${inquiry.id}}" th:text="${inquiry.title}">제목</a>
+      <span th:text="${inquiry.status.label}">상태</span>
+    </li>
+  </ul>
+  <p th:if="${#lists.isEmpty(inquiries)}">작성한 문의가 없습니다.</p>
+</div>
+</body>
+</html>

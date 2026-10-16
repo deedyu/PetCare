@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet 수정</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .content-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #81c784;
+      margin-bottom: 20px;
+    }
+    form {
+      background: #fff9c4;
+      padding: 20px;
+      border-radius: 15px;
+    }
+    form div {
+      margin-bottom: 15px;
+    }
+    form label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: 500;
+    }
+    form input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #fce4ec;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    form input:focus {
+      outline: none;
+      border-color: #a8e6cf;
+      box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
+    }
+    form button {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
+      color: #555;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      margin-right: 10px;
+    }
+    form button:hover {
+      transform: translateY(-2px);
+    }
+    a {
+      color: #fce4ec;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #f1a8c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="content-wrapper">
+    <h1>반려동물 정보 수정</h1>
+
+    <form th:action="@{/pets/{id}/edit(id=${pet.id})}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <div>
+        이름: <input type="text" name="name" th:value="${pet.name}" required>
+      </div>
+      <div>
+        종류: <input type="text" name="type" th:value="${pet.type}" required>
+      </div>
+      <div>
+        나이: <input type="number" name="age" min="0" th:value="${pet.age}" required>
+      </div>
+
+      <button type="submit">저장</button>
+      <a href="/">취소</a>
+    </form>
+  </div>
+</body>
+</html>

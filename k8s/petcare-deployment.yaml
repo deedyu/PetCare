@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petcare-app
+  namespace: petcare
+  labels:
+    app: petcare-app
+spec:
+  replicas: 3  # 고가용성을 위한 복제본 수
+  selector:
+    matchLabels:
+      app: petcare-app
+  template:
+    metadata:
+      labels:
+        app: petcare-app
+    spec:
+      containers:
+      - name: petcare-app
+        image: petcare:v1.0  # 로컬 이미지 사용
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+          name: http
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: petcare-config
+              key: SPRING_DATASOURCE_URL
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: petcare-secret
+              key: SPRING_DATASOURCE_USERNAME
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: petcare-secret
+              key: SPRING_DATASOURCE_PASSWORD
+        - name: PETCARE_ADMIN_INITIAL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: petcare-secret
+              key: PETCARE_ADMIN_INITIAL_PASSWORD
+        - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: petcare-config
+              key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          valueFrom:
+            configMapKeyRef:
+              name: petcare-config
+              key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        - name: SPRING_JPA_SHOW_SQL
+          valueFrom:
+            configMapKeyRef:
+              name: petcare-config
+              key: SPRING_JPA_SHOW_SQL
+        - name: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+          valueFrom:
+            configMapKeyRef:
+              name: petcare-config
+              key: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: petcare-config
+              key: SERVER_PORT
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: petcare-config
+              key: TZ
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      restartPolicy: Always
+

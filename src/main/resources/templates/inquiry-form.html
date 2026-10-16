@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>문의 작성 - PetCare</title>
+  <style>
+    * { box-sizing: border-box; }
+    @media (max-width: 768px) { .wrap { margin: 12px; padding: 16px; } }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f6f7f4; margin: 0; color: #243027; }
+    .wrap { max-width: 820px; margin: 24px auto; background: #fff; border-radius: 16px; padding: 24px; }
+    a { color: #3d7a4a; }
+    input, textarea, button { padding: 8px 10px; border-radius: 8px; border: 1px solid #d5ddd4; }
+    textarea { width: 100%; box-sizing: border-box; }
+    button { background: #3d7a4a; color: white; border: 0; cursor: pointer; }
+    .error { color: #b42318; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>문의 작성</h1>
+  <p><a href="/inquiries">목록</a></p>
+  <p class="error" th:if="${param.error}">제목과 내용을 입력하세요.</p>
+  <form th:action="@{/inquiries}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <p><input type="text" name="title" maxlength="120" required placeholder="제목"></p>
+    <p><textarea name="body" maxlength="2000" rows="5" required placeholder="내용"></textarea></p>
+    <button type="submit">보내기</button>
+  </form>
+</div>
+</body>
+</html>

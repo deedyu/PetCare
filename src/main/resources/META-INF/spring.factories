@@ -1,0 +1,3 @@
+org.springframework.boot.EnvironmentPostProcessor=\
+com.petcare.petcare.config.DotenvEnvironmentPostProcessor,\
+com.petcare.petcare.config.DatasourceEnvironmentGuard

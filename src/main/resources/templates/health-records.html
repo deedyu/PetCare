@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>건강 관리 기록</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .content-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #81c784;
+      margin-bottom: 20px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #fce4ec;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    .back-link:hover {
+      color: #f1a8c0;
+    }
+    hr {
+      border: none;
+      border-top: 2px solid #fce4ec;
+      margin: 20px 0;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .action-buttons a {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
+      color: #555;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.2s ease;
+    }
+    .action-buttons a:hover {
+      transform: translateY(-2px);
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .section-title {
+      font-size: 20px;
+      color: #81c784;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #fce4ec;
+    }
+    .record-card {
+      background: white;
+      padding: 18px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      border-left: 4px solid #a8e6cf;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .record-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .record-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #555;
+    }
+    .record-meta {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #777;
+    }
+    .record-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .record-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: nowrap;
+    }
+    .record-actions a,
+    .record-actions form {
+      display: inline;
+      margin: 0;
+      padding: 0;
+    }
+    .record-actions a {
+      text-decoration: none;
+    }
+    .record-actions button,
+    .record-actions a button {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .edit-btn,
+    .record-actions a.edit-btn {
+      background: #a8e6cf;
+      color: white;
+      border: 1px solid #81c784;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s ease;
+    }
+    .edit-btn:hover,
+    .record-actions a.edit-btn:hover {
+      background: #81c784;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .delete-btn,
+    .record-actions button[type="submit"] {
+      background: #f1a8c0;
+      color: white;
+    }
+    .delete-btn:hover,
+    .record-actions button[type="submit"]:hover {
+      background: #f48fb1;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .empty-message {
+      text-align: center;
+      color: #999;
+      padding: 40px;
+      font-size: 16px;
+    }
+    .weight-chart { width: 100%; max-width: 420px; background: #f7fbf7; border-radius: 12px; padding: 12px; margin-bottom: 16px; }
+    .weight-chart svg { width: 100%; height: auto; }
+    .due-card { border-left: 4px solid #ef9a9a; }
+    .weight-value {
+      font-weight: 600;
+      color: #81c784;
+    }
+  </style>
+</head>
+<body>
+  <div class="content-wrapper">
+    <h1 th:text="${pet.name} + '의 건강 관리 기록'">건강 관리 기록</h1>
+
+    <a href="/" class="back-link">← 홈으로</a>
+
+    <hr>
+
+    <div class="action-buttons">
+      <a th:href="@{'/pets/' + ${pet.id} + '/health/new?type=WEIGHT'}">⚖️ 체중 기록</a>
+      <a th:href="@{'/pets/' + ${pet.id} + '/health/new?type=VACCINATION'}">💉 예방접종</a>
+      <a th:href="@{'/pets/' + ${pet.id} + '/health/new?type=HOSPITAL'}">🏥 병원 방문</a>
+      <a th:href="@{'/pets/' + ${pet.id} + '/health/new?type=MEDICATION'}">💊 복용 약</a>
+    </div>
+
+    <div class="section" th:if="${!#lists.isEmpty(overdueVaccines) or !#lists.isEmpty(upcomingVaccines)}">
+      <h2 class="section-title">💉 접종 예정</h2>
+      <div th:each="record : ${overdueVaccines}" class="record-card due-card">
+        <div class="record-info">
+          <div class="record-title" th:text="${record.title}">접종</div>
+          <div class="record-meta">
+            <span>지남 <span th:text="${record.nextDueDate}"></span></span>
+            <span th:if="${record.vaccinationType != null}" th:text="${record.vaccinationType}">종류</span>
+          </div>
+        </div>
+      </div>
+      <div th:each="record : ${upcomingVaccines}" class="record-card">
+        <div class="record-info">
+          <div class="record-title" th:text="${record.title}">접종</div>
+          <div class="record-meta">
+            <span>예정 <span th:text="${record.nextDueDate}"></span></span>
+            <span th:if="${record.vaccinationType != null}" th:text="${record.vaccinationType}">종류</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 체중 기록 -->
+    <div class="section">
+      <h2 class="section-title">⚖️ 체중 기록</h2>
+      <div class="weight-chart" th:if="${weightChart != null}">
+        <svg viewBox="0 0 320 140" role="img" aria-label="체중 변화">
+          <polyline th:attr="points=${weightChart.polyline}" fill="none" stroke="#81c784" stroke-width="2"></polyline>
+          <circle th:each="point : ${weightChart.points}" th:cx="${point.x}" th:cy="${point.y}" r="4" fill="#43a047"></circle>
+        </svg>
+        <div class="record-meta">
+          <span th:each="point : ${weightChart.points}">
+            <span th:text="${point.date}"></span>
+            <span th:text="${point.weight} + 'kg'"></span>
+          </span>
+        </div>
+      </div>
+      <div th:if="${#lists.isEmpty(weightRecords)}" class="empty-message">
+        등록된 체중 기록이 없습니다.
+      </div>
+      <div th:each="record : ${weightRecords}" class="record-card">
+        <div class="record-info">
+          <div class="record-title" th:text="${record.title}">체중 기록</div>
+          <div class="record-meta">
+            <span>📅 <span th:text="${record.recordDate}"></span></span>
+            <span th:text="${record.author != null ? record.author.name : '작성자 없음'}">작성자</span>
+            <span class="weight-value" th:if="${record.weight != null}">
+              ⚖️ <span th:text="${record.weight} + 'kg'"></span>
+            </span>
+            <span th:if="${record.description != null and record.description != ''}">
+              📝 <span th:text="${record.description}"></span>
+            </span>
+          </div>
+        </div>
+        <div class="record-actions" th:if="${(record.pet != null and record.pet.user != null and record.pet.user.id == user.id) or (record.author != null and record.author.id == user.id)}">
+          <a th:href="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/edit'}" class="edit-btn">수정</a>
+          <form th:action="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/delete'}" method="post" style="display:inline;">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="delete-btn">삭제</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 예방접종 이력 -->
+    <div class="section">
+      <h2 class="section-title">💉 예방접종 이력</h2>
+      <div th:if="${#lists.isEmpty(vaccinationRecords)}" class="empty-message">
+        등록된 예방접종 이력이 없습니다.
+      </div>
+      <div th:each="record : ${vaccinationRecords}" class="record-card">
+        <div class="record-info">
+          <div class="record-title" th:text="${record.title}">예방접종</div>
+          <div class="record-meta">
+            <span>📅 <span th:text="${record.recordDate}"></span></span>
+            <span th:text="${record.author != null ? record.author.name : '작성자 없음'}">작성자</span>
+            <span th:if="${record.vaccinationType != null}">
+              💉 <span th:text="${record.vaccinationType}"></span>
+            </span>
+            <span th:if="${record.nextDueDate != null}">
+              다음 <span th:text="${record.nextDueDate}"></span>
+            </span>
+            <span th:if="${record.description != null and record.description != ''}">
+              📝 <span th:text="${record.description}"></span>
+            </span>
+          </div>
+        </div>
+        <div class="record-actions" th:if="${(record.pet != null and record.pet.user != null and record.pet.user.id == user.id) or (record.author != null and record.author.id == user.id)}">
+          <a th:href="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/edit'}" class="edit-btn">수정</a>
+          <form th:action="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/delete'}" method="post" style="display:inline;">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="delete-btn">삭제</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 병원 방문 기록 -->
+    <div class="section">
+      <h2 class="section-title">🏥 병원 방문 기록</h2>
+      <div th:if="${#lists.isEmpty(hospitalRecords)}" class="empty-message">
+        등록된 병원 방문 기록이 없습니다.
+      </div>
+      <div th:each="record : ${hospitalRecords}" class="record-card">
+        <div class="record-info">
+          <div class="record-title" th:text="${record.title}">병원 방문</div>
+          <div class="record-meta">
+            <span>📅 <span th:text="${record.recordDate}"></span></span>
+            <span th:text="${record.author != null ? record.author.name : '작성자 없음'}">작성자</span>
+            <span th:if="${record.hospitalName != null}">
+              🏥 <span th:text="${record.hospitalName}"></span>
+            </span>
+            <span th:if="${record.description != null and record.description != ''}">
+              📝 <span th:text="${record.description}"></span>
+            </span>
+          </div>
+        </div>
+        <div class="record-actions" th:if="${(record.pet != null and record.pet.user != null and record.pet.user.id == user.id) or (record.author != null and record.author.id == user.id)}">
+          <a th:href="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/edit'}" class="edit-btn">수정</a>
+          <form th:action="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/delete'}" method="post" style="display:inline;">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="delete-btn">삭제</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 복용 약 기록 -->
+    <div class="section">
+      <h2 class="section-title">💊 복용 약 기록</h2>
+      <div th:if="${#lists.isEmpty(medicationRecords)}" class="empty-message">
+        등록된 복용 약 기록이 없습니다.
+      </div>
+      <div th:each="record : ${medicationRecords}" class="record-card">
+        <div class="record-info">
+          <div class="record-title" th:text="${record.title}">복용 약</div>
+          <div class="record-meta">
+            <span>📅 <span th:text="${record.recordDate}"></span></span>
+            <span th:text="${record.author != null ? record.author.name : '작성자 없음'}">작성자</span>
+            <span th:if="${record.medicationName != null}">
+              💊 <span th:text="${record.medicationName}"></span>
+            </span>
+            <span th:if="${record.medicationDosage != null}">
+              📏 <span th:text="${'용량: ' + record.medicationDosage}"></span>
+            </span>
+            <span th:if="${record.description != null and record.description != ''}">
+              📝 <span th:text="${record.description}"></span>
+            </span>
+          </div>
+        </div>
+        <div class="record-actions" th:if="${(record.pet != null and record.pet.user != null and record.pet.user.id == user.id) or (record.author != null and record.author.id == user.id)}">
+          <a th:href="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/edit'}" class="edit-btn">수정</a>
+          <form th:action="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/delete'}" method="post" style="display:inline;">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="delete-btn">삭제</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

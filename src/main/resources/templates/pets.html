@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>반려동물 목록</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .content-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #81c784;
+      margin-bottom: 20px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    ul li {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border-left: 4px solid #a8e6cf;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    a {
+      color: #fce4ec;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #f1a8c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="content-wrapper">
+    <h1>반려동물 목록</h1>
+
+    <ul>
+      <li th:each="pet : ${pets}">
+        <span th:text="${pet.name}"></span>
+        /
+        <span th:text="${pet.type}"></span>
+        /
+        <span th:text="${pet.age}"></span>
+        <span th:if="${pet.family != null}" th:text="' · ' + ${pet.family.name}">가족</span>
+      </li>
+    </ul>
+
+    <a href="/">메인으로</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>캘린더 - PetCare</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f6f4ef;
+      color: #333;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    header { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+    h1 { font-size: 22px; margin: 0; color: #3d6b4f; }
+    a { color: #3d6b4f; text-decoration: none; }
+    .toolbar, .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 16px 0; }
+    .toolbar a, button, select, input[type="date"], input[type="text"] {
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    .toolbar a.active { background: #3d6b4f; color: white; border-color: #3d6b4f; }
+    .weekdays, .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    .weekdays span { font-size: 12px; color: #777; text-align: center; }
+    .day {
+      background: white;
+      min-height: 110px;
+      border-radius: 10px;
+      padding: 8px;
+    }
+    .day.out { opacity: 0.45; }
+    .day.today { outline: 2px solid #8fbc8f; }
+    .num { font-size: 13px; font-weight: 600; }
+    .item {
+      display: block;
+      margin-top: 4px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #243;
+    }
+    .item.done { text-decoration: line-through; opacity: 0.6; }
+    .cat-MEAL { background: #e5f6df; }
+    .cat-WALK { background: #e3f2fd; }
+    .cat-HEALTH { background: #f3e5f5; }
+    .cat-MEDICINE { background: #fff3e0; }
+    .cat-GROOMING { background: #fce4ec; }
+    .cat-HOSPITAL { background: #ffebee; }
+    .cat-OTHER, .cat-null { background: #eee; }
+    .more { font-size: 12px; color: #777; }
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .week-board { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr)); gap: 8px; overflow-x: auto; }
+    label { font-size: 13px; color: #555; }
+    @media (max-width: 768px) {
+      .wrap { padding: 12px; }
+      .day { min-height: 72px; }
+      .item { font-size: 11px; }
+      .week-board { grid-template-columns: repeat(7, minmax(88px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>캘린더</h1>
+    <a href="/">홈으로</a>
+  </header>
+
+  <div class="toolbar">
+    <a th:href="@{/calendar(view=${view}, date=${prev}, petId=${petId}, category=${category})}">이전</a>
+    <strong th:text="${title}">2026년 10월</strong>
+    <a th:href="@{/calendar(view=${view}, date=${next}, petId=${petId}, category=${category})}">다음</a>
+    <a th:href="@{/calendar(view='month', date=${selected}, petId=${petId}, category=${category})}" th:classappend="${view == 'month'} ? 'active'">월</a>
+    <a th:href="@{/calendar(view='week', date=${selected}, petId=${petId}, category=${category})}" th:classappend="${view == 'week'} ? 'active'">주</a>
+    <a th:href="@{/calendar(view='day', date=${selected}, petId=${petId}, category=${category})}" th:classappend="${view == 'day'} ? 'active'">일</a>
+  </div>
+
+  <form class="filters" method="get" action="/calendar">
+    <input type="hidden" name="view" th:value="${view}">
+    <input type="hidden" name="date" th:value="${selected}">
+    <label>반려동물
+      <select name="petId" onchange="this.form.submit()">
+        <option value="">전체</option>
+        <option th:each="p : ${pets}" th:value="${p.id}" th:text="${p.name}" th:selected="${petId == p.id}">이름</option>
+      </select>
+    </label>
+    <label>카테고리
+      <select name="category" onchange="this.form.submit()">
+        <option value="">전체</option>
+        <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.label}" th:selected="${category == c.name}">식사</option>
+      </select>
+    </label>
+  </form>
+
+  <div th:if="${view != 'day'}">
+    <div class="weekdays">
+      <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+    </div>
+    <div th:class="${view == 'week'} ? 'week-board' : 'grid'">
+      <div th:each="day : ${days}" class="day" th:classappend="${!day.inMonth} ? 'out' : (${day.date == selected} ? 'today')">
+        <a class="num" th:href="@{/calendar(view='day', date=${day.date}, petId=${petId}, category=${category})}" th:text="${day.date.dayOfMonth}">1</a>
+        <a th:each="slot : ${day.slots}"
+           th:href="@{/calendar(view='day', date=${day.date}, petId=${petId}, category=${category}, open=${slot.id})}"
+           class="item"
+           th:classappend="${(slot.done ? 'done ' : '') + 'cat-' + (slot.category != null ? slot.category : 'OTHER')}"
+           th:text="${(slot.dueTime != null ? slot.dueTime : '') + ' ' + slot.title}">산책</a>
+        <a th:if="${day.more > 0}" class="more"
+           th:href="@{/calendar(view='day', date=${day.date}, petId=${petId}, category=${category})}"
+           th:text="'외 ' + ${day.more} + '개'">외 1개</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" th:if="${view == 'day'}">
+    <h2 th:text="${title}">10월 15일</h2>
+    <p th:if="${#lists.isEmpty(daySlots)}">이 날짜의 일정이 없습니다.</p>
+    <div th:each="slot : ${daySlots}" style="padding: 10px 0; border-bottom: 1px solid #eee;">
+      <a th:href="@{/calendar(view='day', date=${selected}, petId=${petId}, category=${category}, open=${slot.id})}"
+         th:text="${slot.title}">제목</a>
+      <span th:text="${slot.pet != null ? slot.pet.name : ''}">반려동물</span>
+      <span th:if="${slot.dueTime != null}" th:text="${slot.dueTime}">09:00</span>
+      <span th:if="${slot.assigneeName != null}" th:text="'담당 ' + ${slot.assigneeName}">담당</span>
+      <span th:if="${slot.done}">완료</span>
+    </div>
+  </div>
+
+  <div class="panel" th:if="${opened != null}">
+    <h2 th:text="${opened.title}">일정</h2>
+    <p>
+      <span th:text="${opened.pet != null ? opened.pet.name : ''}">반려동물</span>
+      <span th:text="${opened.occurrenceDate}">날짜</span>
+      <span th:if="${opened.dueTime != null}" th:text="${opened.dueTime}">시간</span>
+    </p>
+    <p th:if="${opened.done}">
+      완료: <span th:text="${opened.completedByName != null ? opened.completedByName : '기록 없음'}">나</span>
+      <span th:if="${opened.completedAt != null}" th:text="${#temporals.format(opened.completedAt, 'HH:mm')}">시간</span>
+    </p>
+    <form th:action="@{/calendar/complete}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <input type="hidden" name="taskId" th:value="${opened.id}">
+      <input type="hidden" name="date" th:value="${opened.occurrenceDate}">
+      <input type="hidden" name="done" th:value="${!opened.done}">
+      <input type="hidden" name="returnTo" th:value="@{/calendar(view='day', date=${selected}, petId=${petId}, category=${category}, open=${opened.id})}">
+      <label>수행 메모
+        <input type="text" name="memo" th:value="${opened.memo}" placeholder="실제로 한 일">
+      </label>
+      <button type="submit" th:text="${opened.done} ? '완료 취소' : '이 날짜 완료'">이 날짜 완료</button>
+    </form>
+    <p><a th:href="@{'/pets/' + ${opened.pet?.id} + '/tasks/' + ${opened.id} + '/edit'}">일정 수정</a></p>
+  </div>
+</div>
+</body>
+</html>

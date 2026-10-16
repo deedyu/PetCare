@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: petcare
+data:
+  MYSQL_DATABASE: "petcare"
+  MYSQL_USER: "petcare"
+
+
+
