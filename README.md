@@ -215,6 +215,12 @@ petcare-lab
 
 스키마는 `ddl-auto=update`로 맞춥니다. 없는 테이블과 컬럼은 추가하고, 기존 행은 지우지 않습니다. API와 테이블 관계는 [docs/api.md](docs/api.md), [docs/erd.md](docs/erd.md)에 정리했습니다.
 
+## 데이터 구조
+
+회원(`user`)을 중심으로 반려동물, 가족, 일정, 건강 기록, 문의, 공지, 알림이 연결됩니다. 가족 그룹 테이블은 `care_family`이고, 알림 테이블은 `app_notification`입니다. 일정은 `task`와 날짜별 `task_occurrence`로 나뉘고, 문의 답변은 `inquiry_reply`에 저장됩니다.
+
+<a href="docs/petcare-ERD.png"><img src="docs/petcare-ERD.png" alt="PetCare ERD" width="100%"></a>
+
 ## Docker 및 Kubernetes 실습
 
 애플리케이션을 이미지로 빌드한 뒤 Docker Hub 공개 저장소 [jeesyu/petcare](https://hub.docker.com/r/jeesyu/petcare)에 올렸습니다. 수업용 Compose는 앱 `8083`, MySQL `3308`로 기존 환경과 포트를 나누었습니다. Kubernetes 수업은 별도 네임스페이스 `petcare-lab`에서 진행했습니다.
