@@ -1,36 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>접근할 수 없습니다 - PetCare</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f7f6f2;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-        }
-        .box {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 420px;
-            text-align: center;
-        }
-        h1 { color: #5f8f68; font-size: 24px; }
-        p { color: #555; line-height: 1.6; }
-        a { color: #5f8f68; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>접근할 수 없습니다 - PetCare</title>
+  <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-    <div class="box">
-        <h1>이 화면은 관리자만 볼 수 있습니다</h1>
-        <p>일반 회원 계정으로는 관리자 페이지에 들어갈 수 없습니다.</p>
-        <p><a href="/">내 홈으로 돌아가기</a></p>
+<main class="auth-page">
+  <section class="auth-card">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div><strong>PetCare</strong><span>반려동물 일정</span></div>
     </div>
+    <h1>이 화면은 관리자만 볼 수 있습니다</h1>
+    <p class="lead">일반 회원 계정으로는 관리자 페이지에 들어갈 수 없습니다.</p>
+    <div class="auth-links"><a href="/">내 홈으로 돌아가기</a></div>
+  </section>
+</main>
 </body>
 </html>

@@ -1,374 +1,77 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마이페이지 - PetCare</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .content-wrapper {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 50px 60px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 30px;
-            border-bottom: 2px solid #fce4ec;
-        }
-        .header h1 {
-            color: #81c784;
-            margin: 0;
-            font-size: 32px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 10px;
-        }
-        .nav-links a {
-            padding: 12px 24px;
-            background: #fce4ec;
-            color: #555;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        .nav-links a:hover {
-            background: #f1a8c0;
-            transform: translateY(-2px);
-        }
-        .section {
-            margin-bottom: 50px;
-            padding: 40px;
-            background: #fff9c4;
-            border-radius: 15px;
-        }
-        .section h2 {
-            color: #81c784;
-            margin-bottom: 25px;
-            font-size: 24px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 16px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #fce4ec;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #a8e6cf;
-            box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
-        }
-        .btn-submit {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-            color: #555;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .btn-submit:hover {
-            transform: translateY(-2px);
-        }
-        .btn-delete {
-            padding: 12px 24px;
-            background: #ffcdd2;
-            color: #c62828;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .btn-delete:hover {
-            background: #ef9a9a;
-            transform: translateY(-2px);
-        }
-        .pet-list {
-            list-style: none;
-            padding: 0;
-        }
-        .pet-list li {
-            background: white;
-            padding: 25px 30px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #a8e6cf;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-        .pet-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .pet-info {
-            flex: 1;
-            font-size: 16px;
-        }
-        .pet-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .btn-edit {
-            padding: 8px 16px;
-            background: #a8e6cf;
-            color: #555;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .btn-edit:hover {
-            background: #81c784;
-            color: white;
-            transform: translateY(-2px);
-        }
-        .btn-delete-pet {
-            padding: 8px 16px;
-            background: #ffcdd2;
-            color: #c62828;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .btn-delete-pet:hover {
-            background: #ef9a9a;
-            transform: translateY(-2px);
-        }
-        .edit-form {
-            display: none;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 15px;
-            border: 2px solid #a8e6cf;
-        }
-        .edit-form.active {
-            display: block;
-        }
-        .edit-form input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 2px solid #fce4ec;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .edit-form-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        .btn-cancel {
-            padding: 8px 16px;
-            background: #e0e0e0;
-            color: #555;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .btn-cancel:hover {
-            background: #bdbdbd;
-            transform: translateY(-2px);
-        }
-        .error-message {
-            background-color: #ffebee;
-            color: #c62828;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            border-left: 4px solid #c62828;
-        }
-        .success-message {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            border-left: 4px solid #2e7d32;
-        }
-        .delete-section {
-            margin-top: 50px;
-            padding: 30px;
-            background: #ffebee;
-            border-radius: 15px;
-            border: 2px solid #ef9a9a;
-        }
-        .delete-section h2 {
-            color: #c62828;
-        }
-        .delete-form {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-        }
-        .delete-warning {
-            color: #c62828;
-            font-weight: 600;
-            margin-bottom: 20px;
-            font-size: 16px;
-        }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko"
+      th:replace="~{fragments/app-shell :: layout('마이페이지', '이름, 비밀번호, 복구 코드를 관리합니다.', 'account', ~{::main})}">
 <body>
-    <div class="content-wrapper">
-        <div class="header">
-            <h1>마이페이지</h1>
-            <div class="nav-links">
-                <a href="/">홈으로</a>
-                <form th:action="@{/logout}" method="post" style="display:inline;background:transparent;padding:0;margin:0;">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <button type="submit" style="background:none;border:none;color:#f1a8c0;font-weight:500;cursor:pointer;">로그아웃</button>
-                </form>
-            </div>
-        </div>
+<main class="stack">
+  <div class="banner error" th:if="${error}" th:text="${error}">오류</div>
+  <div class="banner ok" th:if="${success}" th:text="${success}">완료</div>
+  <div class="banner warn" th:if="${recoveryCode}">
+    새 복구 코드입니다. 이 화면을 벗어나면 다시 볼 수 없습니다.
+    <div id="recoveryCode" class="code-box" th:text="${recoveryCode}">CODE</div>
+  </div>
 
-        <div th:if="${error}" class="error-message" th:text="${error}"></div>
-        <div th:if="${success}" class="success-message" th:text="${success}"></div>
-        <div th:if="${deleteError}" class="error-message" th:text="${deleteError}"></div>
+  <section class="card">
+    <h2>프로필</h2>
+    <form class="form-grid" action="/mypage/name" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <label class="block">아이디
+        <input class="field" type="text" id="username" th:value="${user.username}" readonly>
+      </label>
+      <label class="block">이름
+        <input class="field" type="text" id="name" name="name" th:value="${user.name}" required maxlength="30">
+      </label>
+      <div class="field-error" th:if="${nameError}" th:text="${nameError}">오류</div>
+      <button class="btn btn-primary" type="submit">이름 변경</button>
+    </form>
+  </section>
 
-        <!-- 1. 정보 수정 -->
-        <div class="section">
-            <h2>1. 정보 수정</h2>
-            <form action="/mypage/update" method="post">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <div class="form-group">
-                    <label for="name">이름</label>
-                    <input type="text" id="name" name="name" th:value="${user.name}" required>
-                </div>
-                <div class="form-group">
-                    <label for="username">아이디</label>
-                    <input type="text" id="username" name="username" th:value="${user.username}" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">이메일</label>
-                    <input type="email" id="email" name="email" th:value="${user.email}" placeholder="선택 입력">
-                </div>
-                <div class="form-group">
-                    <label for="password">비밀번호</label>
-                    <input type="password" id="password" name="password" placeholder="변경할 때만 입력" autocomplete="new-password">
-                </div>
-                <button type="submit" class="btn-submit">정보 수정</button>
-            </form>
-        </div>
+  <section class="card">
+    <h2>비밀번호 변경</h2>
+    <form class="form-grid" action="/mypage/password" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <label class="block">현재 비밀번호
+        <input class="field" type="password" name="currentPassword" required autocomplete="current-password">
+      </label>
+      <label class="block">새 비밀번호
+        <input class="field" type="password" name="password" required minlength="8" autocomplete="new-password">
+        <span class="hint">8자 이상, 영문과 숫자를 포함해야 합니다.</span>
+      </label>
+      <label class="block">새 비밀번호 확인
+        <input class="field" type="password" name="passwordConfirm" required minlength="8" autocomplete="new-password">
+      </label>
+      <div class="field-error" th:if="${passwordError}" th:text="${passwordError}">오류</div>
+      <button class="btn btn-primary" type="submit">비밀번호 변경</button>
+    </form>
+  </section>
 
-        <!-- 2. 내가 등록한 반려동물 목록 -->
-        <div class="section">
-            <h2>2. 내가 등록한 반려동물</h2>
-            <ul class="pet-list">
-                <li th:each="pet : ${pets}">
-                    <div class="pet-item">
-                        <div class="pet-info">
-                            <strong th:text="${pet.name}"></strong> /
-                            <span th:text="${pet.type}"></span> /
-                            <span th:text="${pet.age} + '세'"></span>
-                        </div>
-                        <div class="pet-actions">
-                            <button type="button" class="btn-edit" th:attr="onclick='toggleEdit(' + ${pet.id} + ')'">수정</button>
-                            <form th:action="@{'/mypage/pets/' + ${pet.id} + '/delete'}" method="post" style="display: inline;" 
-                                  th:id="'delete-form-' + ${pet.id}">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                <button type="button" class="btn-delete-pet" 
-                                        th:attr="data-pet-id=${pet.id}, data-pet-name=${pet.name}"
-                                        onclick="confirmDeletePet(this)">삭제</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="edit-form" th:id="'edit-form-' + ${pet.id}">
-                        <form th:action="@{'/mypage/pets/' + ${pet.id} + '/update'}" method="post">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <input type="text" name="name" th:value="${pet.name}" placeholder="이름" required>
-                            <input type="text" name="type" th:value="${pet.type}" placeholder="종류" required>
-                            <input type="number" name="age" th:value="${pet.age}" placeholder="나이" min="0" required>
-                            <div class="edit-form-buttons">
-                                <button type="submit" class="btn-submit">저장</button>
-                                <button type="button" class="btn-cancel" th:attr="onclick='toggleEdit(' + ${pet.id} + ')'">취소</button>
-                            </div>
-                        </form>
-                    </div>
-                </li>
-                <li th:if="${#lists.isEmpty(pets)}" style="text-align: center; color: #999; padding: 30px;">
-                    등록된 반려동물이 없습니다.
-                </li>
-            </ul>
-        </div>
+  <section class="card">
+    <h2>복구 코드</h2>
+    <p th:if="${hasRecoveryCode}">재발급하면 이전 복구 코드는 바로 쓸 수 없습니다.</p>
+    <p th:unless="${hasRecoveryCode}">아직 복구 코드가 없습니다. 현재 비밀번호를 확인하면 발급할 수 있습니다. 코드를 분실하면 비밀번호를 자동으로 재설정할 수 없습니다.</p>
+    <form class="form-grid" action="/mypage/recovery" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <label class="block">현재 비밀번호
+        <input class="field" type="password" name="currentPassword" required autocomplete="current-password">
+      </label>
+      <button class="btn" type="submit" th:text="${hasRecoveryCode} ? '복구 코드 재발급' : '복구 코드 발급'">복구 코드 발급</button>
+    </form>
+  </section>
 
-        <!-- 3. 계정 삭제 -->
-        <div class="delete-section">
-            <h2>3. 계정 삭제</h2>
-            <div class="delete-warning">
-                ⚠️ 계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
-            </div>
-            <form action="/mypage/delete" method="post" class="delete-form">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <div class="form-group">
-                    <label for="confirmText">계정 삭제를 확인하려면 <strong>DELETE</strong>를 입력하세요</label>
-                    <input type="text" id="confirmText" name="confirmText" placeholder="DELETE 입력" required>
-                </div>
-                <button type="submit" class="btn-delete">계정 삭제</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        function toggleEdit(petId) {
-            const form = document.getElementById('edit-form-' + petId);
-            if (form) {
-                form.classList.toggle('active');
-            }
-        }
-        
-        function confirmDeletePet(button) {
-            const petId = button.getAttribute('data-pet-id');
-            const petName = button.getAttribute('data-pet-name');
-            if (confirm(petName + '을(를) 정말 삭제하시겠습니까?')) {
-                document.getElementById('delete-form-' + petId).submit();
-            }
-        }
-    </script>
+  <section class="card danger-zone">
+    <h2>회원 탈퇴</h2>
+    <p>내가 등록한 반려동물과 그 일정, 건강 기록은 삭제됩니다. 다른 회원이 남아 있는 가족의 소유자라면 먼저 가족을 정리해야 합니다. 다른 가족의 일정과 건강 기록 자체는 지우지 않고, 담당자와 작성자 표시만 비웁니다.</p>
+    <div class="banner error" th:if="${deleteError}" th:text="${deleteError}">오류</div>
+    <form class="form-grid" action="/mypage/delete" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <label class="block">현재 비밀번호
+        <input class="field" type="password" name="currentPassword" required autocomplete="current-password">
+      </label>
+      <label class="block">확인 문구
+        <input class="field" type="text" name="confirmText" placeholder="DELETE" required>
+      </label>
+      <button class="btn btn-danger" type="submit">계정 삭제</button>
+    </form>
+  </section>
+</main>
 </body>
 </html>
-

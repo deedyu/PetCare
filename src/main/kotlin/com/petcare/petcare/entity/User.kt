@@ -35,7 +35,15 @@ class User(
     // null이면 기존 회원이다. 정지 표시가 생기기 전에는 정상으로 본다.
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    var status: AccountStatus? = null
+    var status: AccountStatus? = null,
+
+    // 복구 코드 원문은 저장하지 않는다. 없는 기존 회원은 마이페이지에서 발급한다.
+    @Column(name = "recovery_code_hash", length = 60)
+    var recoveryCodeHash: String? = null,
+
+    // 비밀번호가 바뀌면 올린다. 이전 로그인 세션은 다음 요청에서 끊긴다.
+    @Column(name = "session_epoch", nullable = false)
+    var sessionEpoch: Int = 0
 ) {
     fun effectiveRole(): Role = role ?: Role.USER
 

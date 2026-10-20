@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<span th:fragment="mark(pet, size)" class="pet-mark" th:classappend="${size}">
+  <img th:if="${pet.resolvedDisplayType.name() == 'PHOTO' and pet.photoKey != null}"
+       th:src="@{/pets/{id}/photo(id=${pet.id},v=${pet.version})}"
+       th:alt="${pet.name}">
+  <span th:if="${pet.resolvedDisplayType.name() == 'EMOJI'}" th:text="${pet.profileEmoji}">🐶</span>
+  <span th:if="${pet.resolvedDisplayType.name() == 'INITIAL' or (pet.resolvedDisplayType.name() == 'PHOTO' and pet.photoKey == null)}"
+        th:text="${pet.initial}">P</span>
+</span>
+</body>
+</html>

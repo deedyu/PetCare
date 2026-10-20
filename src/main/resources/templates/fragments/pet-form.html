@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="editor(pet)">
+  <form id="petProfileForm" class="card form-grid" data-pet-profile method="post" enctype="multipart/form-data"
+        th:action="${pet == null} ? @{/pets} : @{/pets/{id}(id=${pet.id})}"
+        th:data-existing-photo="${pet != null and pet.photoKey != null} ? @{/pets/{id}/photo(id=${pet.id},v=${pet.version})} : ''">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <div class="profile-preview" data-preview>
+      <img data-preview-image alt="" hidden>
+      <span data-preview-text>P</span>
+    </div>
+    <div class="choice-row" role="radiogroup" aria-label="프로필 표시">
+      <label class="choice">
+        <input type="radio" name="displayType" value="PHOTO"
+               th:checked="${(displayType ?: (pet != null ? pet.resolvedDisplayType.name() : 'INITIAL')) == 'PHOTO'}">
+        사진
+      </label>
+      <label class="choice">
+        <input type="radio" name="displayType" value="EMOJI"
+               th:checked="${(displayType ?: (pet != null ? pet.resolvedDisplayType.name() : 'INITIAL')) == 'EMOJI'}">
+        이모지
+      </label>
+      <label class="choice">
+        <input type="radio" name="displayType" value="INITIAL"
+               th:checked="${(displayType ?: (pet != null ? pet.resolvedDisplayType.name() : 'INITIAL')) == 'INITIAL'}">
+        이름 첫 글자
+      </label>
+    </div>
+
+    <div class="profile-panel" data-panel="PHOTO"
+         th:hidden="${(displayType ?: (pet != null ? pet.resolvedDisplayType.name() : 'INITIAL')) != 'PHOTO'}">
+      <div class="row-actions">
+        <label class="btn">
+          사진 선택
+          <input class="visually-hidden" type="file" name="photo" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+        </label>
+        <button class="btn" type="submit" form="deletePhotoForm"
+                th:if="${pet != null and pet.photoKey != null}">사진 삭제</button>
+      </div>
+      <p class="hint">JPG, PNG, WebP · 최대 5MB. 사진은 프로필 칸에 맞게 잘려 보입니다.</p>
+      <p class="field-error" data-photo-error></p>
+    </div>
+
+    <div class="profile-panel" data-panel="EMOJI"
+         th:hidden="${(displayType ?: (pet != null ? pet.resolvedDisplayType.name() : 'INITIAL')) != 'EMOJI'}">
+      <label class="block">이모지
+        <input class="field emoji-field" type="text" name="profileEmoji" placeholder="🐶" maxlength="64"
+               autocomplete="off" inputmode="text"
+               th:value="${profileEmoji != null ? profileEmoji : (pet != null ? pet.profileEmoji : '')}">
+      </label>
+      <p class="hint">기기의 이모지 키보드로 원하는 이모지 하나를 입력하세요. Mac은 Control+Command+Space, Windows는 Windows 키와 마침표입니다.</p>
+    </div>
+
+    <div class="profile-panel" data-panel="INITIAL"
+         th:hidden="${(displayType ?: (pet != null ? pet.resolvedDisplayType.name() : 'INITIAL')) != 'INITIAL'}">
+      <p class="hint">이름의 첫 글자가 프로필에 표시됩니다.</p>
+    </div>
+
+    <label class="block">이름
+      <input class="field" type="text" name="name" required maxlength="40" autocomplete="off"
+             th:value="${name != null ? name : (pet != null ? pet.name : '')}">
+    </label>
+    <label class="block">종류
+      <input class="field" type="text" name="type" required placeholder="예: 강아지, 고양이"
+             th:value="${type != null ? type : (pet != null ? pet.type : '')}">
+    </label>
+    <label class="block">나이
+      <input class="field" type="number" name="age" min="0" required
+             th:value="${age != null ? age : (pet != null ? pet.age : '')}">
+    </label>
+    <div class="row-actions">
+      <button class="btn btn-primary" type="submit" th:text="${pet == null} ? '등록' : '저장'">등록</button>
+      <a class="btn" href="/pets">취소</a>
+    </div>
+  </form>
+  <form th:if="${pet != null and pet.photoKey != null}" id="deletePhotoForm" method="post"
+        th:action="@{/pets/{id}/photo/delete(id=${pet.id})}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+  </form>
+  <script th:src="@{/js/pet-profile.js}"></script>
+</th:block>
+</body>
+</html>

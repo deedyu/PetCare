@@ -2,8 +2,10 @@
 package com.petcare.petcare.api
 
 import com.petcare.petcare.dto.PetDto
+import com.petcare.petcare.entity.ProfileDisplayType
 import com.petcare.petcare.security.CurrentUser
 import com.petcare.petcare.service.FamilyService
+import com.petcare.petcare.service.PetProfileCommand
 import com.petcare.petcare.service.PetService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -56,12 +58,18 @@ class PetApiController(
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Void>()
 
         return try {
+            val type = when (request.profileDisplayType?.trim()?.uppercase()) {
+                null, "", "INITIAL" -> ProfileDisplayType.INITIAL
+                "EMOJI" -> ProfileDisplayType.EMOJI
+                "PHOTO" -> return ResponseEntity.badRequest().body("사진은 파일로 업로드해 주세요.")
+                else -> return ResponseEntity.badRequest().body("표시 방식을 선택하세요.")
+            }
             val pet = petService.createPet(
                 user = user,
                 name = request.name,
                 type = request.type,
                 age = request.age,
-                imageUrl = request.imageUrl
+                profile = PetProfileCommand(type, request.profileEmoji)
             )
             ResponseEntity.ok(pet.toDto())
         } catch (e: IllegalArgumentException) {
@@ -132,7 +140,13 @@ class PetApiController(
         name = name,
         type = type,
         age = age,
-        imageUrl = imageUrl,
+        imageUrl = if (resolvedDisplayType == ProfileDisplayType.PHOTO && !photoKey.isNullOrBlank()) {
+            "/pets/$id/photo"
+        } else {
+            null
+        },
+        profileDisplayType = resolvedDisplayType.name,
+        profileEmoji = profileEmoji,
         familyName = family?.name
     )
 
@@ -140,7 +154,9 @@ class PetApiController(
         val name: String,
         val type: String,
         val age: Int,
-        val imageUrl: String? = null
+        val imageUrl: String? = null,
+        val profileDisplayType: String? = null,
+        val profileEmoji: String? = null
     )
 
     data class UpdatePetRequest(

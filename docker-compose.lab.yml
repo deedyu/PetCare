@@ -1,0 +1,61 @@
+# 수업용 Compose. 기존 docker-compose.yml, 볼륨, Kubernetes 와 분리한다.
+# 프로젝트 이름을 따로 두어 기존 petcare_mysql_data 볼륨을 쓰지 않는다.
+name: petcarelab
+
+services:
+  # MySQL 8. 컨테이너 안 포트는 3306, 맥에서 접속할 때만 3308.
+  mysql:
+    image: mysql:8.0
+    container_name: petcare-lab-mysql
+    env_file:
+      - .env.lab
+    environment:
+      TZ: Asia/Seoul
+    ports:
+      - "3308:3306"
+    volumes:
+      - petcare_lab_mysql_data:/var/lib/mysql
+    networks:
+      - petcare_lab_net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  # 1단계에서 만든 petcare:lab 이미지. 맥 8083 -> 컨테이너 8081.
+  petcare-app:
+    image: petcare:lab
+    container_name: petcare-lab-app
+    env_file:
+      - .env.lab
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/petcare_lab?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "false"
+      SERVER_PORT: "8081"
+      TZ: Asia/Seoul
+    ports:
+      - "8083:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - petcare_lab_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8081/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+volumes:
+  petcare_lab_mysql_data:
+    name: petcare_lab_mysql_data
+
+networks:
+  petcare_lab_net:
+    name: petcare_lab_net

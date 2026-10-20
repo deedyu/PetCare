@@ -1,981 +1,142 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>할일 관리</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .content-wrapper {
-      max-width: 900px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: #81c784;
-      margin-bottom: 20px;
-    }
-    .back-link {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: #fce4ec;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-    .back-link:hover {
-      color: #f1a8c0;
-    }
-    hr {
-      border: none;
-      border-top: 2px solid #fce4ec;
-      margin: 20px 0;
-    }
-    form {
-      background: #fff9c4;
-      padding: 25px;
-      border-radius: 15px;
-      margin-bottom: 30px;
-    }
-    .form-section {
-      margin-bottom: 25px;
-    }
-    .form-section-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #666;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .form-row {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      align-items: end;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-width: 150px;
-    }
-    .form-group label {
-      margin-bottom: 8px;
-      color: #555;
-      font-weight: 500;
-      font-size: 14px;
-    }
-    form input[type="text"],
-    form input[type="date"],
-    form input[type="time"],
-    form select {
-      padding: 12px;
-      border: 2px solid #fce4ec;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-    form input:focus,
-    form select:focus {
-      outline: none;
-      border-color: #a8e6cf;
-      box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
-    }
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    .toggle-row:last-child {
-      border-bottom: none;
-    }
-    .toggle-row-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-    }
-    .toggle-row-icon {
-      font-size: 20px;
-      width: 24px;
-      text-align: center;
-    }
-    .toggle-row-content {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-    .toggle-row-label {
-      font-size: 16px;
-      color: #000;
-      font-weight: 400;
-    }
-    .toggle-row-value {
-      font-size: 14px;
-      color: #666;
-      margin-top: 2px;
-    }
-    .toggle-switch {
-      position: relative;
-      width: 51px;
-      height: 31px;
-      margin-left: 15px;
-    }
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: 0.3s;
-      border-radius: 31px;
-    }
-    .toggle-slider:before {
-      position: absolute;
-      content: "";
-      height: 27px;
-      width: 27px;
-      left: 2px;
-      bottom: 2px;
-      background-color: white;
-      transition: 0.3s;
-      border-radius: 50%;
-    }
-    .toggle-switch input:checked + .toggle-slider {
-      background-color: #a8e6cf;
-    }
-    .toggle-switch input:checked + .toggle-slider:before {
-      transform: translateX(20px);
-    }
-    .toggle-switch input:disabled + .toggle-slider {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .time-picker-wrapper {
-      display: none;
-      margin-top: 10px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 8px;
-    }
-    .time-picker-wrapper.active {
-      display: block;
-    }
-    .time-picker-wrapper input[type="time"] {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 2px solid #a8e6cf;
-      border-radius: 8px;
-      cursor: pointer;
-      background: white;
-      color: #555;
-      transition: all 0.3s ease;
-    }
-    .time-picker-wrapper input[type="time"]:hover {
-      border-color: #81c784;
-      box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
-    }
-    .time-picker-wrapper input[type="time"]:focus {
-      outline: none;
-      border-color: #81c784;
-      box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.3);
-    }
-    .time-picker-wrapper input[type="time"]::-webkit-calendar-picker-indicator {
-      cursor: pointer;
-      opacity: 1;
-      width: 20px;
-      height: 20px;
-    }
-    .notification-picker-wrapper {
-      display: none;
-      margin-top: 10px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 8px;
-    }
-    .notification-picker-wrapper.active {
-      display: block;
-    }
-    form button {
-      padding: 12px 24px;
-      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-      color: #555;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      white-space: nowrap;
-    }
-    form button:hover {
-      transform: translateY(-2px);
-    }
-    h2 {
-      color: #81c784;
-      margin: 20px 0;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    ul li {
-      background: white;
-      padding: 18px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      border-left: 4px solid #a8e6cf;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .task-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .task-title {
-      font-size: 16px;
-      font-weight: 500;
-      color: #555;
-    }
-    .task-title.done {
-      text-decoration: line-through;
-      color: #999;
-    }
-    .task-meta {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      font-size: 13px;
-      color: #777;
-    }
-    .task-meta span {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .task-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: nowrap;
-    }
-    ul li form {
-      display: inline;
-      background: none;
-      padding: 0;
-      margin: 0;
-    }
-    ul li form button {
-      padding: 0;
-      margin: 0;
-      border: none;
-      background: none;
-    }
-    .checkbox-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      background: #f5f5f5;
-      border-radius: 6px;
-      border: 1px solid #e0e0e0;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .checkbox-wrapper:hover {
-      background: #eeeeee;
-      border-color: #81c784;
-    }
-    .checkbox-wrapper input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: #81c784;
-      margin: 0;
-    }
-    .checkbox-wrapper label {
-      margin: 0;
-      cursor: pointer;
-      font-size: 13px;
-      color: #555;
-      user-select: none;
-    }
-    .task-actions button,
-    .task-actions a button {
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .task-actions a {
-      text-decoration: none;
-    }
-    .task-actions button[type="button"] {
-      background: #a8e6cf;
-      color: white;
-      border: 1px solid #81c784;
-    }
-    .task-actions button[type="button"]:hover {
-      background: #81c784;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .task-actions button[type="submit"] {
-      background: #f1a8c0;
-      color: white;
-    }
-    .task-actions button[type="submit"]:hover {
-      background: #f48fb1;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .repeat-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      background: #fce4ec;
-      color: #555;
-    }
-    .priority-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .priority-high {
-      background: #ffcdd2;
-      color: #c62828;
-    }
-    .priority-medium {
-      background: #fff9c4;
-      color: #f57f17;
-    }
-    .priority-low {
-      background: #c8e6c9;
-      color: #2e7d32;
-    }
-    .filter-bar {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-    .search-box {
-      margin-bottom: 15px;
-    }
-    .search-box input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #fce4ec;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .filter-controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .filter-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .filter-group label {
-      font-size: 14px;
-      color: #555;
-      font-weight: 500;
-    }
-    .filter-group select {
-      padding: 8px 12px;
-      border: 2px solid #fce4ec;
-      border-radius: 6px;
-      font-size: 13px;
-      background: white;
-      cursor: pointer;
-    }
-    .filter-group select:focus {
-      outline: none;
-      border-color: #a8e6cf;
-    }
-    @media (max-width: 768px) {
-      body { padding: 12px; }
-      .content-wrapper { padding: 16px; }
-      .toggle-row { flex-wrap: wrap; align-items: flex-start; }
-      .toggle-row select { margin-left: 0 !important; width: 100%; }
-      form input, form select { max-width: 100%; }
-    }
-  </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko"
+      th:replace="~{fragments/app-shell :: layout('일정', '반복, 알림, 우선순위와 완료를 관리합니다.', 'pets', ~{::main})}">
 <body>
-  <div class="content-wrapper">
-    <h1 th:text="${pet.name} + '의 할일 관리'">할일 관리</h1>
-
-    <a href="/" class="back-link">← 홈으로</a>
-
-    <hr>
-
-    <!-- 할일 등록 폼 -->
-    <form th:action="@{'/pets/' + ${pet.id} + '/tasks'}" method="post" id="taskForm">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-      <div class="form-group" style="margin-bottom: 25px;">
-        <label for="title">할일 제목</label>
-        <input type="text" id="title" name="title" placeholder="예: 산책, 사료 급여, 약 복용" required>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="category">카테고리</label>
-          <select id="category" name="category">
-            <option value="NONE">선택 안 함</option>
-            <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.label}">식사</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group" style="margin-bottom: 25px;">
-        <label for="description">상세 설명</label>
-        <input type="text" id="description" name="description" placeholder="메모">
-      </div>
-      <div class="form-group" th:if="${members != null and !#lists.isEmpty(members)}" style="margin-bottom: 25px;">
-        <label for="assigneeId">담당자</label>
-        <select id="assigneeId" name="assigneeId">
-          <option value="">미지정</option>
-          <option th:each="m : ${members}" th:value="${m.userId}" th:text="${m.name}">이름</option>
-        </select>
-      </div>
-
-      <!-- 날짜 및 시간 섹션 -->
-      <div class="form-section">
-        <div class="form-section-title">날짜 및 시간</div>
-        
-        <!-- 날짜 토글 -->
-        <div class="toggle-row">
-          <div class="toggle-row-left">
-            <div class="toggle-row-icon">📅</div>
-            <div class="toggle-row-content">
-              <div class="toggle-row-label">날짜</div>
-              <div class="toggle-row-value" id="dateValue">오늘</div>
-            </div>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="dateToggle" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div id="datePickerWrapper" style="margin-top: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px;">
-          <input type="date" id="dueDate" name="dueDate" style="width: 100%;">
-        </div>
-
-        <!-- 시간 토글 -->
-        <div class="toggle-row">
-          <div class="toggle-row-left">
-            <div class="toggle-row-icon">⏰</div>
-            <div class="toggle-row-content">
-              <div class="toggle-row-label">시간</div>
-              <div class="toggle-row-value" id="timeValue">04:00</div>
-            </div>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="timeToggle" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div id="timePickerWrapper" class="time-picker-wrapper active">
-          <input type="time" id="dueTime" name="dueTime" value="04:00">
-        </div>
-      </div>
-
-      <!-- 반복 및 알림 섹션 -->
-      <div class="form-section">
-        <div class="form-section-title">반복 및 알림</div>
-        
-        <!-- 반복 설정 -->
-        <div class="toggle-row">
-          <div class="toggle-row-left">
-            <div class="toggle-row-icon">🔄</div>
-            <div class="toggle-row-content">
-              <div class="toggle-row-label">반복</div>
-              <div class="toggle-row-value" id="repeatValue">안함</div>
-            </div>
-          </div>
-          <select id="repeatType" name="repeatType" style="margin-left: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
-            <option value="NONE">안함</option>
-            <option value="DAILY">매일</option>
-            <option value="WEEKLY">매주</option>
-            <option value="MONTHLY">매월</option>
-            <option value="WEEKDAYS">요일 지정</option>
-          </select>
-        </div>
-        <div class="form-row" style="margin-top: 10px;">
-          <label style="font-size: 13px; color: #666;">요일 (요일 지정일 때)</label>
-          <label><input type="checkbox" name="weekdays" value="MON"> 월</label>
-          <label><input type="checkbox" name="weekdays" value="TUE"> 화</label>
-          <label><input type="checkbox" name="weekdays" value="WED"> 수</label>
-          <label><input type="checkbox" name="weekdays" value="THU"> 목</label>
-          <label><input type="checkbox" name="weekdays" value="FRI"> 금</label>
-          <label><input type="checkbox" name="weekdays" value="SAT"> 토</label>
-          <label><input type="checkbox" name="weekdays" value="SUN"> 일</label>
-        </div>
-
-        <!-- 알림 설정 -->
-        <div class="toggle-row">
-          <div class="toggle-row-left">
-            <div class="toggle-row-icon">🔔</div>
-            <div class="toggle-row-content">
-              <div class="toggle-row-label">마감 예정 미리 알림</div>
-              <div class="toggle-row-value" id="notificationValue">없음</div>
-            </div>
-          </div>
-          <select id="notificationTime" name="notificationTime" style="margin-left: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
-            <option value="NONE">없음</option>
-            <option value="ON_TIME">정시</option>
-            <option value="10_MIN_BEFORE">10분 전</option>
-            <option value="30_MIN_BEFORE">30분 전</option>
-            <option value="1_HOUR_BEFORE">1시간 전</option>
-          </select>
-        </div>
-
-        <!-- 우선순위 설정 -->
-        <div class="toggle-row">
-          <div class="toggle-row-left">
-            <div class="toggle-row-icon">⭐</div>
-            <div class="toggle-row-content">
-              <div class="toggle-row-label">우선순위</div>
-              <div class="toggle-row-value" id="priorityValue">보통</div>
-            </div>
-          </div>
-          <select id="priority" name="priority" style="margin-left: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
-            <option value="NONE">보통 (기본)</option>
-            <option value="HIGH">높음</option>
-            <option value="MEDIUM">보통</option>
-            <option value="LOW">낮음</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="margin-top: 25px; text-align: center;">
-        <button type="submit">등록</button>
-      </div>
-    </form>
-
-    <hr>
-
-    <h2>할일 목록</h2>
-
-    <!-- 검색 및 필터 바 -->
-    <div class="filter-bar">
-      <form method="get" th:action="@{'/pets/' + ${pet.id} + '/tasks'}" id="filterForm">
-        <div class="search-box">
-          <input type="text" name="search" th:value="${search}" placeholder="🔍 할일 검색..." onchange="this.form.submit()">
-        </div>
-        <div class="filter-controls">
-          <div class="filter-group">
-            <label>상태:</label>
-            <select name="filter" onchange="this.form.submit()">
-              <option value="all" th:selected="${filter == 'all'}">전체</option>
-              <option value="incomplete" th:selected="${filter == 'incomplete'}">미완료</option>
-              <option value="completed" th:selected="${filter == 'completed'}">완료</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>날짜:</label>
-            <input type="date" name="on" th:value="${on}" onchange="this.form.submit()">
-          </div>
-          <div class="filter-group">
-            <label>카테고리:</label>
-            <select name="category" onchange="this.form.submit()">
-              <option value="">전체</option>
-              <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.label}" th:selected="${category == c.name}">식사</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>우선순위:</label>
-            <select name="priority" onchange="this.form.submit()">
-              <option value="">전체</option>
-              <option value="HIGH" th:selected="${priorityFilter == 'HIGH'}">높음</option>
-              <option value="MEDIUM" th:selected="${priorityFilter == 'MEDIUM'}">보통</option>
-              <option value="LOW" th:selected="${priorityFilter == 'LOW'}">낮음</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>정렬:</label>
-            <select name="sort" onchange="this.form.submit()">
-              <option value="" th:selected="${sort == ''}">최신순</option>
-              <option value="date" th:selected="${sort == 'date'}">날짜순</option>
-              <option value="priority" th:selected="${sort == 'priority'}">우선순위순</option>
-              <option value="title" th:selected="${sort == 'title'}">제목순</option>
-            </select>
-          </div>
-        </div>
-      </form>
+<main class="stack">
+  <div class="pet-inline">
+    <span th:replace="~{fragments/pet-mark :: mark(${pet}, 'lg')}"></span>
+    <div>
+      <strong th:text="${pet.name}">이름</strong>
+      <div class="meta" th:text="${pet.type} + ' · ' + ${pet.age} + '세'">일정</div>
     </div>
-
-    <ul>
-      <li th:each="t : ${tasks}">
-        <div class="task-info">
-          <div class="task-title" th:class="${t.doneOnView ? 'task-title done' : 'task-title'}" th:text="${t.title}">title</div>
-          <div th:if="${t.description != null}" th:text="${t.description}" style="color:#666;font-size:13px;margin-top:4px;">설명</div>
-          <div class="task-meta">
-            <span th:if="${t.category != null}" class="repeat-badge" th:switch="${t.category}">
-              <span th:case="'MEAL'">식사</span>
-              <span th:case="'WALK'">산책</span>
-              <span th:case="'HEALTH'">건강</span>
-              <span th:case="'MEDICINE'">약 복용</span>
-              <span th:case="'GROOMING'">목욕 및 미용</span>
-              <span th:case="'HOSPITAL'">병원</span>
-              <span th:case="*">기타</span>
-            </span>
-            <span th:if="${t.assignee != null}" th:text="'담당 ' + ${t.assignee.name}">담당</span>
-            <span th:if="${t.priority != null}">
-              <span class="priority-badge" 
-                    th:classappend="${t.priority == 'HIGH' ? 'priority-high' : (t.priority == 'MEDIUM' ? 'priority-medium' : 'priority-low')}"
-                    th:text="${t.priority == 'HIGH' ? '🔴 높음' : (t.priority == 'MEDIUM' ? '🟡 보통' : '🟢 낮음')}"></span>
-            </span>
-            <span th:if="${t.dueDate != null}">
-              📅 <span th:text="${t.dueDate}"></span>
-            </span>
-            <span th:if="${t.dueTime != null}">
-              ⏰ <span th:text="${t.dueTime}"></span>
-            </span>
-            <span th:if="${t.repeatType != null}">
-              <span class="repeat-badge" th:text="${t.repeatType == 'DAILY' ? '매일' : (t.repeatType == 'WEEKLY' ? '매주' : (t.repeatType == 'WEEKDAYS' ? '요일' : '매월'))}"></span>
-            </span>
-            <span th:if="${t.notificationTime != null}">
-              🔔 <span th:text="${t.notificationTime == 'ON_TIME' ? '정시' : (t.notificationTime == '10_MIN_BEFORE' ? '10분 전' : (t.notificationTime == '30_MIN_BEFORE' ? '30분 전' : '1시간 전'))}"></span>
-            </span>
-          </div>
-        </div>
-        <div class="task-actions">
-          <form th:action="@{'/pets/' + ${pet.id} + '/tasks/' + ${t.id} + '/toggle'}" method="post" style="display:inline;">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <input type="hidden" name="date" th:value="${t.viewDate}">
-            <input type="hidden" name="returnTo" th:value="@{|/pets/${pet.id}/tasks?on=${on}&category=${category}&filter=${filter}|}">
-            <div class="checkbox-wrapper">
-              <input type="checkbox" th:checked="${t.doneOnView}" onchange="this.form.submit()">
-              <label>완료</label>
-            </div>
-          </form>
-          <a th:href="@{'/pets/' + ${pet.id} + '/tasks/' + ${t.id} + '/edit'}" style="text-decoration: none;">
-            <button type="button" style="background: #a8e6cf; color: white;">수정</button>
-          </a>
-          <form th:action="@{'/pets/' + ${pet.id} + '/tasks/' + ${t.id} + '/delete'}" method="post" style="display:inline;">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <button type="submit" style="background: #f1a8c0; color: white;">삭제</button>
-          </form>
-        </div>
-      </li>
-    </ul>
   </div>
+  <form class="card form-grid" th:action="@{'/pets/' + ${pet.id} + '/tasks'}" method="post" id="taskForm" data-task-form>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <label class="block">제목
+      <input class="field" type="text" id="title" name="title" required placeholder="예: 산책, 사료, 약">
+    </label>
+    <label class="block">카테고리
+      <select class="select" id="category" name="category">
+        <option value="NONE">선택 안 함</option>
+        <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.label}">식사</option>
+      </select>
+    </label>
+    <label class="block">설명
+      <input class="field" type="text" id="description" name="description" placeholder="메모">
+    </label>
+    <label class="block" th:if="${members != null and !#lists.isEmpty(members)}">담당자
+      <select class="select" id="assigneeId" name="assigneeId">
+        <option value="">미지정</option>
+        <option th:each="m : ${members}" th:value="${m.userId}" th:text="${m.name}">이름</option>
+      </select>
+    </label>
+    <label class="check-line"><input type="checkbox" id="dateToggle" checked> 날짜 지정</label>
+    <input class="field" type="date" id="dueDate" name="dueDate">
+    <label class="check-line"><input type="checkbox" id="timeToggle" checked> 시간 지정</label>
+    <input class="field" type="time" id="dueTime" name="dueTime" value="09:00">
+    <label class="block">반복
+      <select class="select" id="repeatType" name="repeatType">
+        <option value="NONE">안 함</option>
+        <option value="DAILY">매일</option>
+        <option value="WEEKLY">매주</option>
+        <option value="MONTHLY">매월</option>
+        <option value="WEEKDAYS">요일 지정</option>
+      </select>
+    </label>
+    <div data-weekdays hidden>
+      <span class="hint">요일 지정일 때 선택</span>
+      <div class="row-actions">
+        <label><input type="checkbox" name="weekdays" value="MON"> 월</label>
+        <label><input type="checkbox" name="weekdays" value="TUE"> 화</label>
+        <label><input type="checkbox" name="weekdays" value="WED"> 수</label>
+        <label><input type="checkbox" name="weekdays" value="THU"> 목</label>
+        <label><input type="checkbox" name="weekdays" value="FRI"> 금</label>
+        <label><input type="checkbox" name="weekdays" value="SAT"> 토</label>
+        <label><input type="checkbox" name="weekdays" value="SUN"> 일</label>
+      </div>
+    </div>
+    <label class="block">미리 알림
+      <select class="select" id="notificationTime" name="notificationTime">
+        <option value="NONE">없음</option>
+        <option value="ON_TIME">정시</option>
+        <option value="10_MIN_BEFORE">10분 전</option>
+        <option value="30_MIN_BEFORE">30분 전</option>
+        <option value="1_HOUR_BEFORE">1시간 전</option>
+      </select>
+    </label>
+    <label class="block">우선순위
+      <select class="select" id="priority" name="priority">
+        <option value="NONE">없음</option>
+        <option value="HIGH">높음</option>
+        <option value="MEDIUM">보통</option>
+        <option value="LOW">낮음</option>
+      </select>
+    </label>
+    <button class="btn btn-primary" type="submit">일정 추가</button>
+  </form>
 
-  <script>
-    // 날짜/시간 토글 및 값 업데이트
-    document.addEventListener('DOMContentLoaded', function() {
-      const dateToggle = document.getElementById('dateToggle');
-      const timeToggle = document.getElementById('timeToggle');
-      const datePicker = document.getElementById('dueDate');
-      const timePicker = document.getElementById('dueTime');
-      const dateValue = document.getElementById('dateValue');
-      const timeValue = document.getElementById('timeValue');
-      const repeatSelect = document.getElementById('repeatType');
-      const notificationSelect = document.getElementById('notificationTime');
-      const prioritySelect = document.getElementById('priority');
-      const repeatValue = document.getElementById('repeatValue');
-      const notificationValue = document.getElementById('notificationValue');
-      const priorityValue = document.getElementById('priorityValue');
-      const datePickerWrapper = document.getElementById('datePickerWrapper');
-      const timePickerWrapper = document.getElementById('timePickerWrapper');
-
-      // 오늘 날짜로 기본값 설정
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
-      datePicker.value = todayStr;
-      updateDateValue(todayStr);
-
-      // 날짜 토글
-      dateToggle.addEventListener('change', function() {
-        if (this.checked) {
-          datePickerWrapper.style.display = 'block';
-          datePicker.disabled = false;
-        } else {
-          datePickerWrapper.style.display = 'none';
-          datePicker.disabled = true;
-          datePicker.value = '';
-          dateValue.textContent = '오늘';
-        }
-      });
-
-      // 시간 토글
-      timeToggle.addEventListener('change', function() {
-        if (this.checked) {
-          timePickerWrapper.classList.add('active');
-          timePicker.disabled = false;
-          // 시간이 없으면 기본값 설정
-          if (!timePicker.value) {
-            timePicker.value = '04:00';
-            timeValue.textContent = '04:00';
-          }
-        } else {
-          timePickerWrapper.classList.remove('active');
-          timePicker.disabled = true;
-          timePicker.value = '';
-          timePicker.name = ''; // 폼 제출 시 제외
-          timeValue.textContent = '04:00';
-        }
-      });
-      
-      // 시간 선택기 클릭 및 포커스 이벤트
-      timePicker.addEventListener('click', function(e) {
-        if (!this.disabled) {
-          e.preventDefault();
-          this.focus();
-          // 최신 브라우저에서 시간 선택기 열기
-          if (this.showPicker) {
-            try {
-              this.showPicker();
-            } catch (err) {
-              // showPicker가 지원되지 않는 경우 포커스만
-              this.focus();
-            }
-          }
-        }
-      });
-      
-      timePicker.addEventListener('focus', function() {
-        if (!this.disabled && this.showPicker) {
-          try {
-            this.showPicker();
-          } catch (err) {
-            // 무시
-          }
-        }
-      });
-
-      // 날짜 변경
-      datePicker.addEventListener('change', function() {
-        updateDateValue(this.value);
-      });
-
-      // 시간 변경
-      timePicker.addEventListener('change', function() {
-        if (this.value) {
-          const [hours, minutes] = this.value.split(':');
-          const hour12 = hours % 12 || 12;
-          const ampm = hours < 12 ? '오전' : '오후';
-          timeValue.textContent = `${ampm} ${hour12}:${minutes}`;
-        } else {
-          timeValue.textContent = '04:00';
-        }
-      });
-      
-      // 초기 시간 값 표시
-      if (timePicker.value) {
-        const [hours, minutes] = timePicker.value.split(':');
-        const hour12 = hours % 12 || 12;
-        const ampm = hours < 12 ? '오전' : '오후';
-        timeValue.textContent = `${ampm} ${hour12}:${minutes}`;
-      }
-
-      // 반복 변경
-      repeatSelect.addEventListener('change', function() {
-        const options = { 'NONE': '안함', 'DAILY': '매일', 'WEEKLY': '매주', 'MONTHLY': '매월' };
-        repeatValue.textContent = options[this.value] || '안함';
-      });
-
-      // 알림 변경
-      notificationSelect.addEventListener('change', function() {
-        const options = { 'NONE': '없음', 'ON_TIME': '정시', '10_MIN_BEFORE': '10분 전', '1_HOUR_BEFORE': '1시간 전' };
-        notificationValue.textContent = options[this.value] || '없음';
-      });
-
-      // 우선순위 변경
-      prioritySelect.addEventListener('change', function() {
-        const options = { 'NONE': '보통', 'HIGH': '높음', 'MEDIUM': '보통', 'LOW': '낮음' };
-        priorityValue.textContent = options[this.value] || '보통';
-      });
-
-      function updateDateValue(dateStr) {
-        if (!dateStr) {
-          dateValue.textContent = '오늘';
-          return;
-        }
-        const date = new Date(dateStr);
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        if (dateStr === today.toISOString().split('T')[0]) {
-          dateValue.textContent = '오늘';
-        } else if (dateStr === tomorrow.toISOString().split('T')[0]) {
-          dateValue.textContent = '내일';
-        } else {
-          const month = date.getMonth() + 1;
-          const day = date.getDate();
-          const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-          const weekday = weekdays[date.getDay()];
-          dateValue.textContent = `${month}월 ${day}일 (${weekday})`;
-        }
-      }
-
-      // 폼 제출 시 비활성화된 필드는 제거
-      document.getElementById('taskForm').addEventListener('submit', function(e) {
-        if (!dateToggle.checked) {
-          datePicker.disabled = true;
-          datePicker.name = '';
-        }
-        if (!timeToggle.checked) {
-          timePicker.disabled = true;
-          timePicker.name = '';
-        }
-      });
-    });
-
-    // 브라우저 알림 권한 요청
-    if ('Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission().then(function(permission) {
-          if (permission === 'granted') {
-            console.log('알림 권한이 허용되었습니다.');
-          }
-        });
-      }
-    }
-
-    // 할일 목록 데이터 (Thymeleaf에서 전달)
-    const tasks = [
-      <th:block th:each="t : ${tasks}">
-      {
-        id: <th:block th:text="${t.id}"></th:block>,
-        title: '<th:block th:text="${t.title}"></th:block>',
-        dueDate: '<th:block th:text="${t.dueDate}"></th:block>',
-        dueTime: '<th:block th:text="${t.dueTime}"></th:block>',
-        notificationTime: '<th:block th:text="${t.notificationTime ?: ''}"></th:block>',
-        done: <th:block th:text="${t.done}"></th:block>
-      },
-      </th:block>
-    ];
-
-    // 알림 시간 계산 함수
-    function calculateNotificationTime(dueDate, dueTime, notificationTime) {
-      if (!dueDate || !dueTime || !notificationTime || notificationTime === 'NONE') {
-        return null;
-      }
-
-      const [year, month, day] = dueDate.split('-').map(Number);
-      const [hours, minutes] = dueTime.split(':').map(Number);
-      
-      let notificationDate = new Date(year, month - 1, day, hours, minutes, 0);
-      
-      switch(notificationTime) {
-        case '10_MIN_BEFORE':
-          notificationDate.setMinutes(notificationDate.getMinutes() - 10);
-          break;
-        case '1_HOUR_BEFORE':
-          notificationDate.setHours(notificationDate.getHours() - 1);
-          break;
-        case 'ON_TIME':
-          // 정시는 그대로
-          break;
-        default:
-          return null;
-      }
-      
-      return notificationDate;
-    }
-
-    // 알림 체크 및 표시
-    function checkAndShowNotifications() {
-      if (Notification.permission !== 'granted') {
-        return;
-      }
-
-      const now = new Date();
-      
-      tasks.forEach(task => {
-        if (task.done) return; // 완료된 할일은 알림하지 않음
-        
-        const notificationTime = calculateNotificationTime(
-          task.dueDate,
-          task.dueTime,
-          task.notificationTime
-        );
-        
-        if (!notificationTime) return;
-        
-        // 알림 시간이 현재 시간과 1분 이내 차이면 알림 표시
-        const timeDiff = notificationTime.getTime() - now.getTime();
-        const oneMinute = 60 * 1000;
-        
-        if (timeDiff >= 0 && timeDiff <= oneMinute) {
-          // 이미 알림을 보냈는지 확인 (localStorage 사용)
-          const notificationKey = `notification_${task.id}_${notificationTime.getTime()}`;
-          if (!localStorage.getItem(notificationKey)) {
-            new Notification(`${task.title}`, {
-              body: `일정 시간이 ${task.notificationTime === 'ON_TIME' ? '되었습니다' : '다가옵니다'}.`,
-              icon: '/favicon.ico',
-              tag: `task_${task.id}`,
-              requireInteraction: false
-            });
-            
-            // 알림 표시 기록
-            localStorage.setItem(notificationKey, 'true');
-            
-            // 1시간 후 기록 삭제
-            setTimeout(() => {
-              localStorage.removeItem(notificationKey);
-            }, 60 * 60 * 1000);
-          }
-        }
-      });
-    }
-
-    // 페이지 로드 시 알림 권한 확인 및 알림 체크 시작
-    window.addEventListener('load', function() {
-      if (Notification.permission === 'granted') {
-        // 1분마다 알림 체크
-        setInterval(checkAndShowNotifications, 60 * 1000);
-        // 즉시 한 번 체크
-        checkAndShowNotifications();
-      }
-    });
-  </script>
+  <section class="card">
+    <h2>일정 목록</h2>
+    <form class="filters" method="get" th:action="@{'/pets/' + ${pet.id} + '/tasks'}">
+      <input class="field" type="text" name="search" th:value="${search}" placeholder="검색" aria-label="검색">
+      <select class="select" name="filter" onchange="this.form.submit()">
+        <option value="all" th:selected="${filter == 'all'}">전체</option>
+        <option value="incomplete" th:selected="${filter == 'incomplete'}">미완료</option>
+        <option value="completed" th:selected="${filter == 'completed'}">완료</option>
+      </select>
+      <input class="field" type="date" name="on" th:value="${on}" onchange="this.form.submit()" aria-label="날짜">
+      <select class="select" name="category" onchange="this.form.submit()">
+        <option value="">카테고리 전체</option>
+        <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.label}" th:selected="${category == c.name}">식사</option>
+      </select>
+      <select class="select" name="priority" onchange="this.form.submit()">
+        <option value="">우선순위 전체</option>
+        <option value="HIGH" th:selected="${priorityFilter == 'HIGH'}">높음</option>
+        <option value="MEDIUM" th:selected="${priorityFilter == 'MEDIUM'}">보통</option>
+        <option value="LOW" th:selected="${priorityFilter == 'LOW'}">낮음</option>
+      </select>
+      <select class="select" name="sort" onchange="this.form.submit()">
+        <option value="" th:selected="${sort == ''}">최신순</option>
+        <option value="date" th:selected="${sort == 'date'}">날짜순</option>
+        <option value="priority" th:selected="${sort == 'priority'}">우선순위순</option>
+        <option value="title" th:selected="${sort == 'title'}">제목순</option>
+      </select>
+    </form>
+    <div class="empty" th:if="${#lists.isEmpty(tasks)}">
+      <strong>조건에 맞는 일정이 없어요.</strong>
+      위에서 일정을 추가하거나 필터를 바꿔 보세요.
+    </div>
+    <article class="task-row" th:each="t : ${tasks}">
+      <form th:action="@{'/pets/' + ${pet.id} + '/tasks/' + ${t.id} + '/toggle'}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <input type="hidden" name="date" th:value="${t.viewDate}">
+        <input type="hidden" name="returnTo" th:value="@{|/pets/${pet.id}/tasks?on=${on}&category=${category}&filter=${filter}|}">
+        <input type="checkbox" th:checked="${t.doneOnView}" onchange="this.form.submit()" th:aria-label="${t.title}">
+      </form>
+      <div style="flex:1;">
+        <div th:class="${t.doneOnView} ? 'done' : ''" th:text="${t.title}">제목</div>
+        <div class="meta" th:if="${t.description != null}" th:text="${t.description}">설명</div>
+        <div class="meta">
+          <span th:if="${t.category != null}" th:text="${#lists.isEmpty(categories.?[name() == #root.t.category]) ? t.category : categories.?[name() == #root.t.category][0].label}">분류</span>
+          <span th:if="${t.assignee != null}" th:text="'담당 ' + ${t.assignee.name}">담당</span>
+          <span class="badge" th:if="${t.priority != null}"
+                th:classappend="${t.priority == 'HIGH'} ? ' high' : (${t.priority == 'LOW'} ? ' low' : ' medium')"
+                th:text="${t.priority == 'HIGH'} ? '높음' : (${t.priority == 'LOW'} ? '낮음' : '보통')">우선순위</span>
+          <span th:if="${t.dueDate != null}" th:text="${t.dueDate}">날짜</span>
+          <span th:if="${t.dueTime != null}" th:text="${t.dueTime}">시간</span>
+          <span th:if="${t.repeatType != null}" th:text="${t.repeatType == 'DAILY'} ? '매일' : (${t.repeatType == 'WEEKLY'} ? '매주' : (${t.repeatType == 'WEEKDAYS'} ? '요일' : '매월'))">반복</span>
+          <span th:if="${t.notificationTime != null}" th:text="${t.notificationTime == 'ON_TIME'} ? '정시' : (${t.notificationTime == '10_MIN_BEFORE'} ? '10분 전' : (${t.notificationTime == '30_MIN_BEFORE'} ? '30분 전' : '1시간 전'))">알림</span>
+        </div>
+      </div>
+      <div class="row-actions">
+        <a class="btn" th:href="@{'/pets/' + ${pet.id} + '/tasks/' + ${t.id} + '/edit'}">수정</a>
+        <form th:action="@{'/pets/' + ${pet.id} + '/tasks/' + ${t.id} + '/delete'}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <button class="btn btn-danger" type="submit">삭제</button>
+        </form>
+      </div>
+    </article>
+  </section>
+</main>
 </body>
 </html>

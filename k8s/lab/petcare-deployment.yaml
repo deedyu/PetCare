@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petcare-app
+  namespace: petcare-lab
+  labels:
+    app: petcare-app
+    app.kubernetes.io/part-of: petcare-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: petcare-app
+      app.kubernetes.io/part-of: petcare-lab
+  template:
+    metadata:
+      labels:
+        app: petcare-app
+        app.kubernetes.io/part-of: petcare-lab
+    spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:8.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until mysqladmin ping -h mysql --protocol=TCP -u"$SPRING_DATASOURCE_USERNAME" -p"$SPRING_DATASOURCE_PASSWORD" --silent; do sleep 3; done
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: petcare-lab-app-secret
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: petcare-lab-app-secret
+                  key: SPRING_DATASOURCE_PASSWORD
+      containers:
+        - name: petcare-app
+          image: jeesyu/petcare:lab-v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8081
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: petcare-lab-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: petcare-lab-config
+                  key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              valueFrom:
+                configMapKeyRef:
+                  name: petcare-lab-config
+                  key: SPRING_JPA_HIBERNATE_DDL_AUTO
+            - name: SPRING_JPA_SHOW_SQL
+              valueFrom:
+                configMapKeyRef:
+                  name: petcare-lab-config
+                  key: SPRING_JPA_SHOW_SQL
+            - name: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+              valueFrom:
+                configMapKeyRef:
+                  name: petcare-lab-config
+                  key: SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: petcare-lab-config
+                  key: SERVER_PORT
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: petcare-lab-config
+                  key: TZ
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: petcare-lab-app-secret
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: petcare-lab-app-secret
+                  key: SPRING_DATASOURCE_PASSWORD
+            - name: PETCARE_ADMIN_INITIAL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: petcare-lab-app-secret
+                  key: PETCARE_ADMIN_INITIAL_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3

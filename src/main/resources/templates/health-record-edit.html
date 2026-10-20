@@ -1,185 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>건강 기록 수정</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .content-wrapper {
-      max-width: 700px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: #81c784;
-      margin-bottom: 20px;
-    }
-    .back-link {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: #fce4ec;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-    .back-link:hover {
-      color: #f1a8c0;
-    }
-    hr {
-      border: none;
-      border-top: 2px solid #fce4ec;
-      margin: 20px 0;
-    }
-    form {
-      background: #fff9c4;
-      padding: 25px;
-      border-radius: 15px;
-      margin-bottom: 30px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-      font-weight: 500;
-      font-size: 14px;
-    }
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #fce4ec;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      font-family: inherit;
-    }
-    .form-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #a8e6cf;
-      box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
-    }
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 25px;
-    }
-    form button {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .submit-btn {
-      background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-      color: #555;
-    }
-    .cancel-btn {
-      background: #e0e0e0;
-      color: #555;
-    }
-    form button:hover {
-      transform: translateY(-2px);
-    }
-    .type-specific {
-      display: none;
-    }
-    .type-specific.active {
-      display: block;
-    }
-  </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko"
+      th:replace="~{fragments/app-shell :: layout('건강 기록 수정', '기록 내용을 고칩니다.', 'health', ~{::main})}">
 <body>
-  <div class="content-wrapper">
-    <h1>건강 기록 수정</h1>
-
-    <a th:href="@{'/pets/' + ${pet.id} + '/health'}" class="back-link">← 목록으로</a>
-
-    <hr>
-
-    <form th:action="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/update'}" method="post">
+<main>
+  <form class="card form-grid" th:action="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/update'}" method="post">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-      <div class="form-group">
-        <label for="title">제목 *</label>
-        <input type="text" id="title" name="title" th:value="${record.title}" required>
-      </div>
-
-      <div class="form-group">
-        <label for="recordDate">날짜 *</label>
-        <input type="date" id="recordDate" name="recordDate" th:value="${record.recordDate}" required>
-      </div>
-
-      <!-- 체중 기록 전용 -->
-      <div class="form-group type-specific" th:classappend="${record.recordType == 'WEIGHT' ? 'active' : ''}">
-        <label for="weight">체중 (kg)</label>
-        <input type="number" id="weight" name="weight" step="0.1" min="0" th:value="${record.weight}">
-      </div>
-
-      <!-- 예방접종 전용 -->
-      <div class="form-group type-specific" th:classappend="${record.recordType == 'VACCINATION' ? 'active' : ''}">
-        <label for="vaccinationType">예방접종 종류</label>
-        <input type="text" id="vaccinationType" name="vaccinationType" th:value="${record.vaccinationType}">
-      </div>
-      <div class="form-group type-specific" th:classappend="${record.recordType == 'VACCINATION' ? 'active' : ''}">
-        <label for="nextDueDate">다음 접종일</label>
-        <input type="date" id="nextDueDate" name="nextDueDate" th:value="${record.nextDueDate}">
-      </div>
-
-      <!-- 병원 방문 전용 -->
-      <div class="form-group type-specific" th:classappend="${record.recordType == 'HOSPITAL' ? 'active' : ''}">
-        <label for="hospitalName">병원 이름</label>
-        <input type="text" id="hospitalName" name="hospitalName" th:value="${record.hospitalName}">
-      </div>
-
-      <!-- 복용 약 전용 -->
-      <div class="form-group type-specific" th:classappend="${record.recordType == 'MEDICATION' ? 'active' : ''}">
-        <label for="medicationName">약 이름</label>
-        <input type="text" id="medicationName" name="medicationName" th:value="${record.medicationName}">
-      </div>
-      <div class="form-group type-specific" th:classappend="${record.recordType == 'MEDICATION' ? 'active' : ''}">
-        <label for="medicationDosage">복용량</label>
-        <input type="text" id="medicationDosage" name="medicationDosage" th:value="${record.medicationDosage}">
-      </div>
-
-      <div class="form-group">
-        <label for="description">상세 설명</label>
-        <textarea id="description" name="description" th:text="${record.description}"></textarea>
-      </div>
-
-      <div class="button-group">
-        <button type="submit" class="submit-btn">수정</button>
-        <a th:href="@{'/pets/' + ${pet.id} + '/health'}" style="text-decoration: none;">
-          <button type="button" class="cancel-btn">취소</button>
-        </a>
-      </div>
-    </form>
-  </div>
+    <label class="block">제목
+      <input class="field" type="text" name="title" th:value="${record.title}" required>
+    </label>
+    <label class="block">날짜
+      <input class="field" type="date" name="recordDate" th:value="${record.recordDate}" required>
+    </label>
+    <label class="block">체중 (kg)
+      <input class="field" type="number" name="weight" step="0.1" min="0" th:value="${record.weight}">
+    </label>
+    <label class="block">예방접종 종류
+      <input class="field" type="text" name="vaccinationType" th:value="${record.vaccinationType}">
+    </label>
+    <label class="block">다음 접종일
+      <input class="field" type="date" name="nextDueDate" th:value="${record.nextDueDate}">
+    </label>
+    <label class="block">병원 이름
+      <input class="field" type="text" name="hospitalName" th:value="${record.hospitalName}">
+    </label>
+    <label class="block">약 이름
+      <input class="field" type="text" name="medicationName" th:value="${record.medicationName}">
+    </label>
+    <label class="block">복용량
+      <input class="field" type="text" name="medicationDosage" th:value="${record.medicationDosage}">
+    </label>
+    <label class="block">상세 설명
+      <textarea class="field" name="description" th:text="${record.description}"></textarea>
+    </label>
+    <div class="row-actions">
+      <button class="btn btn-primary" type="submit">저장</button>
+      <a class="btn" th:href="@{'/pets/' + ${pet.id} + '/health'}">취소</a>
+    </div>
+  </form>
+</main>
 </body>
 </html>
-
-
-

@@ -10,8 +10,12 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import com.petcare.petcare.entity.Role
 import com.petcare.petcare.repository.UserRepository
 import com.petcare.petcare.security.PasswordRules
@@ -27,6 +31,50 @@ class AuthFlowTest {
     @Autowired lateinit var userService: UserService
     @Autowired lateinit var userRepository: UserRepository
     @Autowired lateinit var passwordEncoder: PasswordEncoder
+
+    @Test
+    fun loginPageDoesNotOfferAdminLink() {
+        mockMvc.perform(get("/login"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(not(containsString("/admin/login"))))
+            .andExpect(content().string(not(containsString("관리자 로그인"))))
+        mockMvc.perform(get("/register"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(not(containsString("/admin/login"))))
+    }
+
+    @Test
+    fun registerCannotCreateAdminAccount() {
+        mockMvc.perform(
+            post("/register").with(csrf())
+                .param("username", "admin")
+                .param("password", "abcd1234")
+                .param("passwordConfirm", "abcd1234")
+                .param("name", "가짜관리자")
+        ).andExpect(status().isOk)
+            .andExpect(content().string(containsString("사용할 수 없는 아이디입니다.")))
+        assertEquals(Role.ADMIN, userRepository.findByUsername("admin")!!.effectiveRole())
+    }
+
+    @Test
+    fun memberCannotCallAdminUserApi() {
+        userService.createUser("member-api", "abcd1234", "회원")
+        val login = mockMvc.perform(
+            post("/login").with(csrf())
+                .param("username", "member-api")
+                .param("password", "abcd1234")
+        ).andReturn()
+        val session = login.request.getSession(false) as MockHttpSession
+        mockMvc.perform(
+            post("/api/users")
+                .session(session)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"username":"made-by-member","password":"abcd1234","name":"회원생성"}""")
+        ).andExpect(status().isForbidden)
+        mockMvc.perform(get("/admin/notices").session(session))
+            .andExpect(status().isForbidden)
+    }
 
     @Test
     fun anonymousApiIsRejected() {
@@ -68,6 +116,7 @@ class AuthFlowTest {
             post("/login").with(csrf())
                 .param("username", "admin")
                 .param("password", "admin")
+                .param("from", "admin")
         ).andExpect(redirectedUrl("/admin"))
             .andReturn()
 
@@ -77,6 +126,13 @@ class AuthFlowTest {
             .andExpect(redirectedUrl("/admin"))
         mockMvc.perform(get("/admin").session(session))
             .andExpect(status().isOk)
+            .andExpect(content().string(containsString("대시보드")))
+        mockMvc.perform(get("/admin/notices").session(session))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("공지사항 관리")))
+        mockMvc.perform(get("/admin/inquiries").session(session))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("문의 관리")))
     }
 
     @Test

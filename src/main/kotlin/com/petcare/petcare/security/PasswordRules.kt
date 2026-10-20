@@ -9,7 +9,8 @@ object PasswordRules {
         if (password.length < 8) {
             throw IllegalArgumentException("비밀번호는 8자 이상이어야 합니다.")
         }
-        if (!password.any { it.isLetter() } || !password.any { it.isDigit() }) {
+        val hasLetter = password.any { it in 'A'..'Z' || it in 'a'..'z' }
+        if (!hasLetter || !password.any { it.isDigit() }) {
             throw IllegalArgumentException("비밀번호는 영문과 숫자를 모두 포함해야 합니다.")
         }
     }

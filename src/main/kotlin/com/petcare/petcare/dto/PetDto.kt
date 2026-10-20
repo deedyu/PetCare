@@ -6,6 +6,8 @@ data class PetDto(
     val type: String,
     val age: Int,
     val imageUrl: String?,
+    val profileDisplayType: String = "INITIAL",
+    val profileEmoji: String? = null,
     val familyName: String? = null
 )
 

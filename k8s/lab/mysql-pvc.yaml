@@ -1,0 +1,15 @@
+# 이 Namespace 전용 디스크 요청이다. petcare Namespace 의 mysql-pvc 와는 다른 객체다.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: petcare-lab-mysql-pvc
+  namespace: petcare-lab
+  labels:
+    app.kubernetes.io/part-of: petcare-lab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: hostpath
+  resources:
+    requests:
+      storage: 1Gi

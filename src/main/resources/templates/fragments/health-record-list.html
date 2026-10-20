@@ -1,0 +1,25 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="recordList(records)" th:remove="tag">
+  <article class="task-row" th:each="record : ${records}">
+    <div style="flex:1;">
+      <strong th:text="${record.title}">제목</strong>
+      <div class="meta">
+        <span th:text="${record.recordDate}">날짜</span>
+        <span th:text="${record.author != null ? record.author.name : '작성자 없음'}">작성자</span>
+        <span th:if="${record.weight != null}" th:text="${record.weight} + 'kg'">체중</span>
+        <span th:if="${record.vaccinationType != null}" th:text="${record.vaccinationType}">접종</span>
+        <span th:if="${record.nextDueDate != null}" th:text="'다음 ' + ${record.nextDueDate}">다음</span>
+        <span th:if="${record.hospitalName != null}" th:text="${record.hospitalName}">병원</span>
+        <span th:if="${record.medicationName != null}" th:text="${record.medicationName}">약</span>
+        <span th:if="${record.medicationDosage != null}" th:text="${record.medicationDosage}">용량</span>
+      </div>
+      <p th:if="${record.description != null and record.description != ''}" th:text="${record.description}">설명</p>
+    </div>
+    <div class="row-actions" th:if="${(record.pet != null and record.pet.user != null and record.pet.user.id == user.id) or (record.author != null and record.author.id == user.id)}">
+      <a class="btn" th:href="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/edit'}">수정</a>
+      <form th:action="@{'/pets/' + ${pet.id} + '/health/' + ${record.id} + '/delete'}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <button class="btn btn-danger" type="submit">삭제</button>
+      </form>
+    </div>
+  </article>
+</div>

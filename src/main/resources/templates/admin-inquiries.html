@@ -1,34 +1,37 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
-  <title>문의 - 관리자</title>
-  <style>
-    * { box-sizing: border-box; }
-    @media (max-width: 768px) { .wrap { margin: 12px; padding: 16px; } }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f6f7f4; margin: 0; color: #243027; }
-    .wrap { max-width: 820px; margin: 24px auto; background: #fff; border-radius: 16px; padding: 24px; }
-    a { color: #3d7a4a; margin-right: 12px; }
-    .card { border: 1px solid #e4e8e1; border-radius: 12px; padding: 16px; margin: 12px 0; }
-    ul { padding-left: 18px; }
-  </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/admin-shell :: layout('문의 관리', '접수된 문의를 상태별로 확인하고 답변 화면으로 이동합니다.', 'inquiries', ~{::main})}">
 <body>
-<div class="wrap">
-  <h1>문의</h1>
-  <p>
-    <a href="/admin">회원</a>
-    <a href="/admin/notices">공지</a>
-  </p>
-  <ul>
-    <li th:each="inquiry : ${inquiries}">
-      <a th:href="@{'/admin/inquiries/' + ${inquiry.id}}" th:text="${inquiry.title}">제목</a>
-      <span th:text="${inquiry.status.label}">상태</span>
-      <span th:text="${inquiry.author != null ? inquiry.author.name : '작성자 없음'}">작성자</span>
-    </li>
-  </ul>
-  <p th:if="${#lists.isEmpty(inquiries)}">접수된 문의가 없습니다.</p>
-</div>
+<main>
+  <div class="toolbar">
+    <select class="select" data-inquiry-filter aria-label="문의 상태 필터">
+      <option value="all">상태 전체</option>
+      <option value="OPEN">접수</option>
+      <option value="IN_PROGRESS">처리 중</option>
+      <option value="ANSWERED">답변 완료</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>제목</th><th>작성자</th><th>접수일</th><th>처리 상태</th></tr>
+      </thead>
+      <tbody>
+        <tr th:if="${#lists.isEmpty(inquiries)}"><td colspan="4" class="empty">접수된 문의가 없습니다.</td></tr>
+        <tr id="inquiryEmpty" hidden><td colspan="4" class="empty">선택한 상태의 문의가 없습니다.</td></tr>
+        <tr th:each="inquiry : ${inquiries}" th:attr="data-inquiry=${inquiry.status.name()}">
+          <td><a th:href="@{'/admin/inquiries/' + ${inquiry.id}}" th:text="${inquiry.title}">제목</a></td>
+          <td th:text="${inquiry.author != null ? inquiry.author.name : '작성자 없음'}">작성자</td>
+          <td th:text="${#temporals.format(inquiry.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</td>
+          <td>
+            <span class="badge"
+                  th:classappend="${inquiry.status.name() == 'ANSWERED'} ? ' badge-ok' : (${inquiry.status.name() == 'IN_PROGRESS'} ? ' badge-progress' : ' badge-wait')"
+                  th:text="${inquiry.status.label}">접수</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
 </body>
 </html>

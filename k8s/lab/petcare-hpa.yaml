@@ -1,0 +1,23 @@
+# petcare-lab 앱만 자동 확장한다. 최소 2개, 최대 3개.
+# CPU 50% 는 limit 이 아니라 request 100m 을 기준으로 계산한다.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: petcare-lab-hpa
+  namespace: petcare-lab
+  labels:
+    app.kubernetes.io/part-of: petcare-lab
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: petcare-app
+  minReplicas: 2
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50

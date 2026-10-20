@@ -28,6 +28,18 @@ class SessionUserSyncFilter(
             val session = request.session
             val user = userRepository.findById(principal.id).orElse(null)
             if (user != null) {
+                val storedEpoch = epochOf(session.getAttribute("authEpoch"))
+                if (storedEpoch == null) {
+                    session.setAttribute("authEpoch", user.sessionEpoch)
+                } else if (storedEpoch != user.sessionEpoch) {
+                    SecurityContextLogoutHandler().logout(
+                        request,
+                        response,
+                        SecurityContextHolder.getContext().authentication
+                    )
+                    response.sendRedirect("/login?reset")
+                    return
+                }
                 if (user.effectiveStatus() == AccountStatus.SUSPENDED) {
                     SecurityContextLogoutHandler().logout(
                         request,
@@ -50,6 +62,12 @@ class SessionUserSyncFilter(
             }
         }
         filterChain.doFilter(request, response)
+    }
+
+    private fun epochOf(value: Any?): Int? = when (value) {
+        is Int -> value
+        is Number -> value.toInt()
+        else -> null
     }
 
     private fun isMemberPage(uri: String): Boolean {

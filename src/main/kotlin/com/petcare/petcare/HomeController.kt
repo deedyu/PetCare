@@ -28,8 +28,7 @@ class HomeController(
         val userId = user.id!!
         
         // 사용자별 반려동물 조회 (최신 3개)
-        val visiblePets = petService.getVisiblePets(userId)
-        val pets = visiblePets.take(3)
+        val pets = petService.getVisiblePets(userId)
         
         // 사용자별 일정 조회
         val allTasks = taskService.getTasksByUser(userId)
@@ -48,7 +47,7 @@ class HomeController(
             .take(5) // 최대 5개만 표시
         
         // 대시보드 데이터 계산
-        val petCount = visiblePets.size
+        val petCount = pets.size
         val totalTaskCount = allTasks.size
         val todayTaskCount = todaySlots.size
         val completedTaskCount = taskService.countCompleted(userId)

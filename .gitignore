@@ -44,3 +44,8 @@ out/
 .env.*
 !.env.example
 .DS_Store
+
+### 실행 데이터 ###
+*.log
+logs/
+petcare-data/

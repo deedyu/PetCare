@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>복구 코드 - PetCare</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<main class="auth-page">
+    <section class="auth-card">
+        <div class="brand">
+            <div class="brand-mark">P</div>
+            <div>
+                <strong>PetCare</strong>
+                <span>반려동물 일정</span>
+            </div>
+        </div>
+        <h1 th:text="${headline} ?: '가입이 완료되었습니다'">가입이 완료되었습니다</h1>
+        <p class="lead" th:text="${lead} ?: '아래 복구 코드는 이 화면에서만 표시됩니다. 비밀번호를 잊으면 이 코드로만 재설정할 수 있으니 안전한 곳에 보관하세요.'">안내</p>
+
+        <div th:if="${recoveryCode}">
+            <p id="recoveryCode" class="code-box" th:text="${recoveryCode}"></p>
+            <button class="btn" type="button" id="copyCode">코드 복사</button>
+        </div>
+        <div th:unless="${recoveryCode}" class="banner warn">
+            복구 코드는 발급 직후 한 번만 표시됩니다. 이미 이 화면을 보았다면 코드를 따로 적어 둔 곳을 확인해 주세요.
+        </div>
+        <div class="auth-links">
+            <a href="/login">로그인 화면으로 이동</a>
+        </div>
+    </section>
+</main>
+<script>
+    const copy = document.getElementById("copyCode");
+    const code = document.getElementById("recoveryCode");
+    if (copy && code) {
+        copy.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(code.textContent.trim());
+                copy.textContent = "복사했습니다";
+            } catch (error) {
+                copy.textContent = "직접 선택해서 복사해 주세요";
+            }
+        });
+    }
+</script>
+</body>
+</html>

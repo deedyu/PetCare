@@ -1,0 +1,21 @@
+# 컨테이너 안 포트는 8081 이고, 브라우저용 포트만 8084 다.
+# 기존 8081 LoadBalancer 와 호스트 포트가 겹치지 않는다.
+apiVersion: v1
+kind: Service
+metadata:
+  name: petcare-service
+  namespace: petcare-lab
+  labels:
+    app: petcare-app
+    app.kubernetes.io/part-of: petcare-lab
+spec:
+  type: LoadBalancer
+  selector:
+    app: petcare-app
+    app.kubernetes.io/part-of: petcare-lab
+  sessionAffinity: ClientIP
+  ports:
+    - name: http
+      port: 8084
+      targetPort: 8081
+      protocol: TCP

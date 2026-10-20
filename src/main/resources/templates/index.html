@@ -1,1055 +1,138 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetCare</title>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-            min-height: 100vh;
-        }
-        .content-wrapper {
-            background: white;
-            border-radius: 20px;
-            padding: 50px 60px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 50px;
-            padding-bottom: 30px;
-            border-bottom: 2px solid #fce4ec;
-        }
-        .header h1 {
-            color: #81c784;
-            margin: 0;
-            font-size: 32px;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .user-info span {
-            color: #555;
-            font-weight: 500;
-            font-size: 16px;
-        }
-        .btn-logout {
-            padding: 12px 24px;
-            background: #fce4ec;
-            color: #555;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        .btn-logout:hover {
-            background: #f1a8c0;
-            transform: translateY(-2px);
-        }
-        form {
-            background: #fff9c4;
-            padding: 40px;
-            border-radius: 15px;
-            margin-bottom: 50px;
-        }
-        form div {
-            margin-bottom: 25px;
-        }
-        form label {
-            display: block;
-            margin-bottom: 10px;
-            color: #555;
-            font-weight: 500;
-            font-size: 16px;
-        }
-        form input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #fce4ec;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        form input:focus {
-            outline: none;
-            border-color: #a8e6cf;
-            box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
-        }
-        form button {
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-            color: #555;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            margin-top: 10px;
-        }
-        form button:hover {
-            transform: translateY(-2px);
-        }
-        h2 {
-            color: #81c784;
-            margin-top: 50px;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        ul li {
-            background: white;
-            padding: 25px 30px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #a8e6cf;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            font-size: 16px;
-        }
-        ul li a {
-            color: #fce4ec;
-            text-decoration: none;
-            font-weight: 500;
-            margin-left: 15px;
-            font-size: 16px;
-            padding: 8px 16px;
-            background: #fce4ec;
-            color: #555;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-        ul li a:hover {
-            background: #f1a8c0;
-            color: white;
-            text-decoration: none;
-        }
-        hr {
-            border: none;
-            border-top: 2px solid #fce4ec;
-            margin: 40px 0;
-        }
-        .banner {
-            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .banner h1 {
-            color: #555;
-            font-size: 36px;
-            margin: 0 0 10px 0;
-            font-weight: 600;
-        }
-        .banner .subtitle {
-            color: #999;
-            font-size: 18px;
-            margin: 0;
-            font-weight: 400;
-        }
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 50px;
-        }
-        .dashboard-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            border-left: 4px solid #a8e6cf;
-            transition: transform 0.3s ease;
-        }
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-        }
-        .dashboard-card:nth-child(1) {
-            background: #e3f2fd;
-            border-left-color: #2196f3;
-        }
-        .dashboard-card:nth-child(2) {
-            background: #fce4ec;
-            border-left-color: #e91e63;
-        }
-        .dashboard-card:nth-child(3) {
-            background: #f5f5f5;
-            border-left-color: #757575;
-        }
-        .dashboard-card:nth-child(4) {
-            background: #e8f5e9;
-            border-left-color: #4caf50;
-        }
-        .dashboard-card h3 {
-            color: #555;
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 15px;
-        }
-        .dashboard-card .number {
-            color: #81c784;
-            font-size: 48px;
-            font-weight: 700;
-            margin: 0;
-        }
-        .dashboard-card .percent {
-            color: #81c784;
-            font-size: 48px;
-            font-weight: 700;
-            margin: 0;
-        }
-        .profile-section h2 {
-            color: #81c784;
-            margin-top: -5px;
-            margin-bottom: 12px;
-            font-size: 24px;
-            text-align: center;
-        }
-        .profile-form {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .profile-form .form-group {
-            margin-bottom: 18px;
-        }
-        .profile-form label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .profile-form input,
-        .profile-form select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #fce4ec;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-        .profile-form select {
-            cursor: pointer;
-        }
-        .emoji-preview {
-            display: inline-block;
-            font-size: 24px;
-            margin-left: 10px;
-        }
-        .profile-form input:focus {
-            outline: none;
-            border-color: #a8e6cf;
-            box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.2);
-        }
-        .profile-form .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .profile-form .submit-btn,
-        .profile-form .reset-btn {
-            flex: 1;
-            max-width: 200px;
-            padding: 14px 32px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .profile-form .submit-btn {
-            background: linear-gradient(135deg, #a8e6cf 0%, #fff9c4 50%, #fce4ec 100%);
-            color: #555;
-        }
-        .profile-form .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(168, 230, 207, 0.3);
-        }
-        .profile-form .reset-btn {
-            background: #e0e0e0;
-            color: #555;
-        }
-        .profile-form .reset-btn:hover {
-            background: #bdbdbd;
-            transform: translateY(-2px);
-        }
-        .pet-sections-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-            align-items: stretch;
-        }
-        .pet-register-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            width: 100%;
-            height: 100%;
-            min-height: 300px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .pet-register-btn:hover {
-            transform: translateY(-5px);
-        }
-        .right-sections-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            height: 100%;
-        }
-        .profile-section {
-            background: #fff9c4;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 0;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-        }
-        .pet-list-section {
-            background: #ffe0b2;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
-        .pet-list-section h2 {
-            color: #555;
-            margin-top: -5px;
-            margin-bottom: 12px;
-            font-size: 24px;
-            text-align: center;
-        }
-        .pet-list-container {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            width: 100%;
-            box-sizing: border-box;
-            flex: 1;
-            min-height: 0;
-            overflow-y: auto;
-            position: relative;
-        }
-        .pet-list-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        .pet-list-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .pet-list-container::-webkit-scrollbar-thumb {
-            background: #a8e6cf;
-            border-radius: 10px;
-        }
-        .pet-list-container::-webkit-scrollbar-thumb:hover {
-            background: #81c784;
-        }
-        .pet-list-container ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-        }
-        .pet-list-container li {
-            background: #fff9c4;
-            padding: 8px 15px;
-            margin-bottom: 8px;
-            border-radius: 10px;
-            border-left: 4px solid #a8e6cf;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .pet-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #a8e6cf;
-            flex-shrink: 0;
-        }
-        .pet-avatar-placeholder {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #a8e6cf;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-        .pet-info-with-avatar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-        .pet-list-container li:last-child {
-            margin-bottom: 0;
-        }
-        .pet-info-text {
-            font-size: 15px;
-            color: #555;
-            line-height: 1.4;
-        }
-        .pet-info-text strong {
-            color: #81c784;
-        }
-        .pet-list-container .task-link {
-            padding: 6px 14px;
-            background: #a8e6cf;
-            color: #555;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-        .pet-list-container .task-link:hover {
-            background: #81c784;
-            color: white;
-            transform: translateY(-2px);
-        }
-        .empty-pet-message {
-            text-align: center;
-            color: #999;
-            padding: 40px;
-            font-size: 16px;
-        }
-        .today-tasks-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 50px;
-        }
-        .today-tasks-main-title {
-            color: #555;
-            font-size: 24px;
-            font-weight: 600;
-            text-align: center;
-            margin: 0;
-            margin-bottom: 10px;
-        }
-        .tasks-split-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-        .incomplete-tasks-section {
-            background: #b3e5fc;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
-        .incomplete-tasks-section h2 {
-            color: #555;
-            margin-top: -5px;
-            margin-bottom: 12px;
-            font-size: 20px;
-            text-align: center;
-        }
-        .today-tasks-section {
-            background: #e6f3ff;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
-        .today-tasks-section h2 {
-            color: #555;
-            margin-top: -5px;
-            margin-bottom: 12px;
-            font-size: 20px;
-            text-align: center;
-        }
-        .today-tasks-list {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            flex: 1;
-            min-height: 0;
-            max-height: 320px;
-            overflow-y: auto;
-        }
-        .today-tasks-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        .today-tasks-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .today-tasks-list::-webkit-scrollbar-thumb {
-            background: #a8e6cf;
-            border-radius: 10px;
-        }
-        .today-tasks-list::-webkit-scrollbar-thumb:hover {
-            background: #81c784;
-        }
-        .today-tasks-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .today-tasks-list li {
-            background: transparent;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .today-tasks-list li form {
-            display: inline-flex;
-            margin: 0;
-            padding: 0;
-            align-items: center;
-        }
-        .today-tasks-checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            width: 24px;
-            height: 24px;
-        }
-        .today-tasks-checkbox-wrapper input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #81c784;
-            margin: 0;
-            flex-shrink: 0;
-        }
-        .today-tasks-list li:last-child {
-            margin-bottom: 0;
-        }
-        .task-item-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .task-item-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: #555;
-        }
-        .task-item-title.done {
-            text-decoration: line-through;
-            color: #999;
-        }
-        .task-item-meta {
-            font-size: 12px;
-            color: #777;
-            display: flex;
-            gap: 10px;
-        }
-        .task-item-pet {
-            font-size: 12px;
-            color: #81c784;
-            font-weight: 500;
-        }
-        .task-item-time {
-            font-size: 12px;
-            color: #fce4ec;
-        }
-        .empty-tasks-message {
-            text-align: center;
-            color: #999;
-            padding: 30px;
-            font-size: 14px;
-        }
-        .completed-tasks-section {
-            background: #c8e6c9;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
-        .completed-tasks-section h2 {
-            color: #555;
-            margin-top: -5px;
-            margin-bottom: 12px;
-            font-size: 20px;
-            text-align: center;
-        }
-        .completed-tasks-list {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            flex: 1;
-            min-height: 0;
-            max-height: 320px;
-            overflow-y: auto;
-        }
-        .completed-tasks-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        .completed-tasks-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .completed-tasks-list::-webkit-scrollbar-thumb {
-            background: #a8e6cf;
-            border-radius: 10px;
-        }
-        .completed-tasks-list::-webkit-scrollbar-thumb:hover {
-            background: #81c784;
-        }
-        .completed-tasks-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .completed-tasks-list li {
-            background: transparent;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .completed-tasks-list li form {
-            display: inline-flex;
-            margin: 0;
-            padding: 0;
-            align-items: center;
-        }
-        .completed-tasks-checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            width: 24px;
-            height: 24px;
-        }
-        .completed-tasks-checkbox-wrapper input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #81c784;
-            margin: 0;
-            flex-shrink: 0;
-        }
-        .completed-tasks-list li:last-child {
-            margin-bottom: 0;
-        }
-        .top-sections-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        .high-priority-section {
-            background: #f3e5f5;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
-        .high-priority-section h2 {
-            color: #555;
-            margin-top: -5px;
-            margin-bottom: 15px;
-            font-size: 22px;
-            text-align: center;
-        }
-        .high-priority-list {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .high-priority-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        .high-priority-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .high-priority-list::-webkit-scrollbar-thumb {
-            background: #a8e6cf;
-            border-radius: 10px;
-        }
-        .high-priority-list::-webkit-scrollbar-thumb:hover {
-            background: #81c784;
-        }
-        .high-priority-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .high-priority-list li {
-            background: transparent;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border-left: 4px solid #ffcdd2;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: all 0.2s ease;
-        }
-        .high-priority-list li:hover {
-            background: #f5f5f5;
-            transform: translateX(5px);
-        }
-        .high-priority-list li:last-child {
-            margin-bottom: 0;
-        }
-        .priority-task-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .priority-task-title {
-            font-size: 15px;
-            font-weight: 500;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .priority-task-meta {
-            display: flex;
-            gap: 12px;
-            font-size: 13px;
-            color: #777;
-            flex-wrap: wrap;
-        }
-        .priority-task-meta span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .priority-badge-main {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .priority-high-main {
-            background: #ffcdd2;
-            color: #c62828;
-        }
-        .priority-medium-main {
-            background: #fff9c4;
-            color: #f57f17;
-        }
-        .priority-low-main {
-            background: #c8e6c9;
-            color: #2e7d32;
-        }
-        .empty-priority-message {
-            text-align: center;
-            color: #999;
-            padding: 40px;
-            font-size: 14px;
-        }
-        .notice-board {
-            background: #fff;
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-        }
-        .notice-board h2 { margin: 0 0 8px; color: #2e7d32; font-size: 18px; }
-        .notice-item { padding: 8px 0; border-top: 1px solid #eee; }
-        .notice-item p { margin: 4px 0 0; white-space: pre-wrap; }
-        @media (max-width: 768px) {
-            body { padding: 16px 12px; }
-            .content-wrapper { padding: 20px 16px; }
-            .header { margin-bottom: 24px; }
-            .user-info { flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
-            .banner h1 { font-size: 22px; }
-            .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-            .dashboard-card { padding: 16px; }
-            .pet-sections-container,
-            .tasks-split-container,
-            .top-sections-container { grid-template-columns: minmax(0, 1fr); }
-            .pet-sections-container > *,
-            .tasks-split-container > *,
-            .top-sections-container > * { min-width: 0; }
-            .pet-list-container li { flex-wrap: wrap; }
-        }
-    </style>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko"
+      th:replace="~{fragments/app-shell :: layout('홈', '오늘 할 일과 반려동물을 한눈에 봅니다.', 'home', ~{::main})}">
 <body>
-<div class="content-wrapper">
-    <!-- 배너 -->
-    <div class="banner">
-        <h1>사랑스러운 친구들을 위한 하루 관리</h1>
-        <p class="subtitle">반려동물 To-Do List</p>
-    </div>
+<main>
+  <p class="meta" th:text="${#temporals.format(#temporals.createNow(), 'yyyy년 M월 d일')}">날짜</p>
+  <h2 style="margin:4px 0 16px;font-size:22px;" th:text="${user.name} + '님, 안녕하세요'">안녕하세요</h2>
+  <div class="page-actions">
+    <a class="btn btn-primary" href="/pets/new">반려동물 등록</a>
+    <a class="btn" href="/calendar">캘린더 열기</a>
+  </div>
 
-    <!-- 사용자 정보 및 메뉴 -->
-    <div class="header">
-        <div></div>
-        <div class="user-info">
-            <span th:text="${user.name} + '님 환영합니다!'"></span>
-            <a href="/calendar" class="btn-logout" style="background: #e3f2fd; margin-right: 10px;">캘린더</a>
-            <a href="/family" class="btn-logout" style="background: #e8f5e9; margin-right: 10px;">가족</a>
-            <a href="/inquiries" class="btn-logout" style="background: #f3e5f5; margin-right: 10px;">문의</a>
-            <a href="/notifications" class="btn-logout" style="background: #fff3e0; margin-right: 10px;">
-                알림<span th:if="${unreadNotifications > 0}" th:text="' ' + ${unreadNotifications}"> 1</span>
-            </a>
-            <a href="/pets/new" class="btn-logout" style="background: #fff9c4; margin-right: 10px;">반려동물 등록</a>
-            <a href="/mypage" class="btn-logout" style="background: #a8e6cf; margin-right: 10px;">마이페이지</a>
-            <form th:action="@{/logout}" method="post" style="display:inline;background:transparent;padding:0;margin:0;border-radius:0;">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <button type="submit" class="btn-logout">로그아웃</button>
-            </form>
-        </div>
-    </div>
+  <section class="kpi-grid" aria-label="일정 요약">
+    <article class="card kpi"><span>오늘 일정</span><strong th:text="${todayTaskCount}">0</strong></article>
+    <article class="card kpi"><span>예정 일정</span><strong th:text="${scheduledTaskCount}">0</strong></article>
+    <article class="card kpi"><span>완료된 일정</span><strong th:text="${completedTaskCount}">0</strong></article>
+    <article class="card kpi"><span>전체 일정</span><strong th:text="${totalTaskCount}">0</strong></article>
+  </section>
 
-    <div class="notice-board" th:if="${!#lists.isEmpty(announcements)}">
-        <h2>공지</h2>
-        <div class="notice-item" th:each="notice : ${announcements}">
-            <strong th:if="${notice.pinned}">고정</strong>
-            <strong th:text="${notice.title}">제목</strong>
-            <p th:text="${notice.body}">내용</p>
-        </div>
-    </div>
-
-    <!-- 대시보드 -->
-    <div class="dashboard">
-        <div class="dashboard-card">
-            <h3>오늘</h3>
-            <p class="number" th:text="${todayTaskCount}">0</p>
-        </div>
-        <div class="dashboard-card">
-            <h3>예정</h3>
-            <p class="number" th:text="${scheduledTaskCount}">0</p>
-        </div>
-        <div class="dashboard-card">
-            <h3>전체</h3>
-            <p class="number" th:text="${totalTaskCount}">0</p>
-        </div>
-        <div class="dashboard-card">
-            <h3>완료됨</h3>
-            <p class="number" th:text="${completedTaskCount}">0</p>
-        </div>
-    </div>
-
-    <!-- 첫 번째 행: 중요 일정 | 등록된 반려동물 -->
-    <div class="top-sections-container">
-        <!-- 우선순위 높은 일정 목록 -->
-        <div class="high-priority-section">
-            <h2>⭐ 중요 일정</h2>
-            <div class="high-priority-list">
-                <ul>
-                    <li th:each="task : ${highPriorityTasks}">
-                        <div class="priority-task-info">
-                            <div class="priority-task-title">
-                                <span class="priority-badge-main" 
-                                      th:classappend="${task.priority == 'HIGH' ? 'priority-high-main' : (task.priority == 'MEDIUM' ? 'priority-medium-main' : 'priority-low-main')}"
-                                      th:text="${task.priority == 'HIGH' ? '🔴 높음' : (task.priority == 'MEDIUM' ? '🟡 보통' : '🟢 낮음')}"></span>
-                                <span th:text="${task.title}">일정 제목</span>
-                            </div>
-                            <div class="priority-task-meta">
-                                <span th:if="${task.pet != null}">
-                                    🐾 <span th:text="${task.pet.name}">반려동물</span>
-                                </span>
-                                <span th:if="${task.dueDate != null}">
-                                    📅 <span th:text="${task.dueDate}"></span>
-                                </span>
-                                <span th:if="${task.dueTime != null}">
-                                    ⏰ <span th:text="${task.dueTime}"></span>
-                                </span>
-                            </div>
-                        </div>
-                        <a th:href="@{'/pets/' + ${task.pet?.id} + '/tasks'}" style="text-decoration: none;">
-                            <button type="button" style="padding: 8px 16px; background: #a8e6cf; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; white-space: nowrap;">할일 관리</button>
-                        </a>
-                    </li>
-                    <li th:if="${#lists.isEmpty(highPriorityTasks)}" class="empty-priority-message">
-                        우선순위가 설정된 일정이 없습니다.
-                    </li>
-                </ul>
+  <div class="grid-2 section">
+    <section class="card">
+      <h2>오늘 해야 할 일</h2>
+      <ul class="list" th:if="${!#lists.isEmpty(incompleteTodayTasks)}">
+        <li th:each="task : ${incompleteTodayTasks}">
+          <form th:action="@{'/pets/' + ${task.pet?.id} + '/tasks/' + ${task.id} + '/toggle'}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="date" th:value="${task.occurrenceDate}">
+            <input type="checkbox" th:checked="${task.done}" onchange="this.form.submit()" th:aria-label="${task.title}">
+          </form>
+          <div>
+            <div th:text="${task.title}">일정</div>
+            <div class="meta">
+              <span class="pet-inline" th:if="${task.pet != null}">
+                <span th:replace="~{fragments/pet-mark :: mark(${task.pet}, 'sm')}"></span>
+                <span th:text="${task.pet.name}">반려동물</span>
+              </span>
+              <span th:if="${task.dueTime != null}" th:text="${task.dueTime}">시간</span>
+              <span th:if="${task.assigneeName != null}" th:text="'담당 ' + ${task.assigneeName}">담당</span>
             </div>
-        </div>
+          </div>
+        </li>
+      </ul>
+      <div class="empty" th:if="${#lists.isEmpty(incompleteTodayTasks)}">
+        <strong>오늘 남은 일정이 없어요.</strong>
+        반려동물을 고르면 일정을 추가할 수 있습니다.
+        <div style="margin-top:10px;"><a class="btn" href="/pets">반려동물 보기</a></div>
+      </div>
 
-        <!-- 등록된 반려동물 목록 -->
-        <div class="pet-list-section">
-            <h2>📋 등록된 반려동물</h2>
-            <div class="pet-list-container">
-                <ul>
-                    <li th:each="p : ${pets}">
-                        <div class="pet-info-with-avatar">
-                            <div th:if="${p.imageUrl != null and p.imageUrl != ''}" 
-                                 class="pet-avatar-placeholder"
-                                 th:text="${p.imageUrl}">
-                            </div>
-                            <div th:unless="${p.imageUrl != null and p.imageUrl != ''}" 
-                                 class="pet-avatar-placeholder">
-                                🐾
-                            </div>
-                            <div class="pet-info-text">
-                                <strong th:text="${p.name}"></strong> /
-                                <span th:text="${p.type}"></span> /
-                                <span th:text="${p.age} + '세'"></span>
-                                <span th:if="${p.family != null}" th:text="' · 가족 ' + ${p.family.name}">가족</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <a th:href="@{'/pets/' + ${p.id} + '/tasks'}" class="task-link">할일 관리</a>
-                            <a th:href="@{'/pets/' + ${p.id} + '/health'}" class="task-link" style="background: #fce4ec;">건강 관리</a>
-                        </div>
-                    </li>
-                    <li th:if="${#lists.isEmpty(pets)}" class="empty-pet-message">
-                        등록된 반려동물이 없습니다.
-                    </li>
-                </ul>
+      <h2 style="margin-top:18px;">오늘 완료한 일</h2>
+      <ul class="list" th:if="${!#lists.isEmpty(completedTodayTasks)}">
+        <li th:each="task : ${completedTodayTasks}">
+          <form th:action="@{'/pets/' + ${task.pet?.id} + '/tasks/' + ${task.id} + '/toggle'}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="date" th:value="${task.occurrenceDate}">
+            <input type="checkbox" th:checked="${task.done}" onchange="this.form.submit()" th:aria-label="${task.title}">
+          </form>
+          <div>
+            <div class="done" th:text="${task.title}">일정</div>
+            <div class="meta">
+              <span class="pet-inline" th:if="${task.pet != null}">
+                <span th:replace="~{fragments/pet-mark :: mark(${task.pet}, 'sm')}"></span>
+                <span th:text="${task.pet.name}">반려동물</span>
+              </span>
+              <span th:if="${task.dueTime != null}" th:text="${task.dueTime}">시간</span>
             </div>
-        </div>
+          </div>
+        </li>
+      </ul>
+      <p class="meta" th:if="${#lists.isEmpty(completedTodayTasks)}">오늘 완료한 일정은 아직 없습니다.</p>
+    </section>
+
+    <section class="card">
+      <h2>중요 일정</h2>
+      <ul class="list" th:if="${!#lists.isEmpty(highPriorityTasks)}">
+        <li th:each="task : ${highPriorityTasks}">
+          <div>
+            <span class="badge" th:classappend="${task.priority == 'HIGH'} ? ' high' : (${task.priority == 'LOW'} ? ' low' : ' medium')"
+                  th:text="${task.priority == 'HIGH'} ? '높음' : (${task.priority == 'LOW'} ? '낮음' : '보통')">높음</span>
+            <div th:text="${task.title}">일정</div>
+            <div class="meta">
+              <span class="pet-inline" th:if="${task.pet != null}">
+                <span th:replace="~{fragments/pet-mark :: mark(${task.pet}, 'sm')}"></span>
+                <span th:text="${task.pet.name}">반려동물</span>
+              </span>
+              <span th:if="${task.dueDate != null}" th:text="${task.dueDate}">날짜</span>
+              <span th:if="${task.dueTime != null}" th:text="${task.dueTime}">시간</span>
+            </div>
+            <a th:if="${task.pet != null}" th:href="@{'/pets/' + ${task.pet.id} + '/tasks'}">일정 관리</a>
+          </div>
+        </li>
+      </ul>
+      <div class="empty" th:if="${#lists.isEmpty(highPriorityTasks)}">
+        <strong>우선순위를 둔 일정이 없어요.</strong>
+        일정에 높음, 보통, 낮음을 표시하면 여기에 모입니다.
+      </div>
+    </section>
+  </div>
+
+  <section class="section" id="pets">
+    <div class="page-actions">
+      <h2 style="margin:0;">내 반려동물</h2>
+      <a class="btn btn-primary" href="/pets/new">반려동물 등록하기</a>
     </div>
-
-    <!-- 두 번째 행: 미완료 일정 | 완료 일정 -->
-    <div class="tasks-split-container">
-        <!-- 미완료 일정 목록 -->
-        <div class="incomplete-tasks-section">
-            <h2>⏳ 미완료 일정</h2>
-            <div class="today-tasks-list">
-                <ul>
-                    <li th:each="task : ${incompleteTodayTasks}">
-                        <form th:action="@{'/pets/' + ${task.pet?.id} + '/tasks/' + ${task.id} + '/toggle'}" method="post" class="task-toggle-form">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <input type="hidden" name="date" th:value="${task.occurrenceDate}">
-                            <div class="today-tasks-checkbox-wrapper">
-                                <input type="checkbox" th:checked="${task.done}" onchange="handleTaskToggle(this)">
-                            </div>
-                        </form>
-                        <div class="task-item-info">
-                            <div class="task-item-title" th:text="${task.title}">일정 제목</div>
-                            <div class="task-item-meta">
-                                <span class="task-item-pet" th:text="${task.pet?.name}">반려동물</span>
-                                <span class="task-item-time" th:if="${task.dueTime != null}">
-                                    ⏰ <span th:text="${task.dueTime}"></span>
-                                </span>
-                                <span th:if="${task.assigneeName != null}" th:text="'담당 ' + ${task.assigneeName}">담당</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li th:if="${#lists.isEmpty(incompleteTodayTasks)}" class="empty-tasks-message">
-                        미완료 일정이 없습니다.
-                    </li>
-                </ul>
-            </div>
+    <div class="pet-grid" th:if="${!#lists.isEmpty(pets)}">
+      <article class="card pet-card" th:each="p : ${pets}">
+        <span th:replace="~{fragments/pet-mark :: mark(${p}, 'lg')}"></span>
+        <div style="flex:1;min-width:0;">
+          <strong th:text="${p.name}">이름</strong>
+          <div class="meta">
+            <span th:text="${p.type}">종류</span>
+            <span th:text="${p.age} + '세'">나이</span>
+            <span th:if="${p.family != null}" th:text="${p.family.name}">가족</span>
+          </div>
+          <div class="row-actions" style="margin-top:8px;">
+            <a class="btn" th:href="@{'/pets/' + ${p.id} + '/tasks'}">일정</a>
+            <a class="btn" th:href="@{'/pets/' + ${p.id} + '/health'}">건강 기록</a>
+          </div>
         </div>
-
-        <!-- 완료 일정 목록 -->
-        <div class="completed-tasks-section" id="completedTasksSection">
-            <h2>✅ 완료 일정</h2>
-            <div class="completed-tasks-list">
-                <ul>
-                    <li th:each="task : ${completedTodayTasks}">
-                        <form th:action="@{'/pets/' + ${task.pet?.id} + '/tasks/' + ${task.id} + '/toggle'}" method="post">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <input type="hidden" name="date" th:value="${task.occurrenceDate}">
-                            <div class="completed-tasks-checkbox-wrapper">
-                                <input type="checkbox" th:checked="${task.done}" onchange="this.form.submit()">
-                            </div>
-                        </form>
-                        <div class="task-item-info">
-                            <div class="task-item-title done" th:text="${task.title}">일정 제목</div>
-                            <div class="task-item-meta">
-                                <span class="task-item-pet" th:text="${task.pet?.name}">반려동물</span>
-                                <span class="task-item-time" th:if="${task.dueTime != null}">
-                                    ⏰ <span th:text="${task.dueTime}"></span>
-                                </span>
-                                <span th:if="${task.assigneeName != null}" th:text="'담당 ' + ${task.assigneeName}">담당</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li th:if="${#lists.isEmpty(completedTodayTasks)}" class="empty-tasks-message">
-                        완료 일정이 없습니다.
-                    </li>
-                </ul>
-            </div>
-        </div>
+      </article>
     </div>
-</div>
+    <div class="empty" th:if="${#lists.isEmpty(pets)}">
+      <strong>아직 등록된 반려동물이 없어요.</strong>
+      반려동물을 등록하고 일정을 관리해 보세요.
+      <div style="margin-top:10px;"><a class="btn btn-primary" href="/pets/new">반려동물 등록하기</a></div>
+    </div>
+  </section>
 
-<script>
-    function updateEmojiPreview() {
-        const select = document.getElementById('emoji');
-        const preview = document.getElementById('emoji-preview');
-        if (select.value) {
-            preview.textContent = select.value;
-        } else {
-            preview.textContent = '';
-        }
-    }
-
-    function handleTaskToggle(checkbox) {
-        const form = checkbox.closest('form');
-        if (form) {
-            form.submit();
-            // 폼 제출 후 완료된 일정 섹션으로 스크롤
-            setTimeout(function() {
-                const completedSection = document.getElementById('completedTasksSection');
-                if (completedSection) {
-                    completedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
-        }
-    }
-</script>
+  <section class="section card" th:if="${!#lists.isEmpty(announcements)}">
+    <h2>공지</h2>
+    <article class="notice" th:each="notice : ${announcements}">
+      <span class="badge" th:if="${notice.pinned}">고정</span>
+      <strong th:text="${notice.title}">제목</strong>
+      <p th:text="${notice.body}">내용</p>
+    </article>
+  </section>
+</main>
 </body>
 </html>
