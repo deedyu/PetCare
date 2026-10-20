@@ -148,6 +148,26 @@
 <br>관리자는 같은 문의의 작성자, 내용, 접수 상태를 보고 상태를 접수·처리 중·답변 완료로 저장합니다. 답변을 입력해 등록하며, 등록 전에는 아직 답변이 없다고 표시됩니다.
 </td>
 </tr>
+<tr>
+<td width="50%" valign="top">
+<a href="docs/screenshots/public/admin/사용자%20입장에서%20공지사항.png"><img src="docs/screenshots/public/admin/사용자%20입장에서%20공지사항.png" alt="회원 홈 공지" width="100%"></a>
+<br><strong>09. 회원 홈 공지</strong>
+<br>회원 홈의 공지 영역만 보면 고정한 글이 고정 표시와 함께 위에 나오고, 일반 공지는 그 아래에 제목과 내용이 표시됩니다.
+</td>
+<td width="50%" valign="top">
+<a href="docs/screenshots/public/admin/사용자에게%20문의%20답변%20알림%20뜸.png"><img src="docs/screenshots/public/admin/사용자에게%20문의%20답변%20알림%20뜸.png" alt="문의 답변 알림" width="100%"></a>
+<br><strong>10. 문의 답변 알림</strong>
+<br>관리자 답변이 등록되면 회원 알림에 읽지 않은 문의 알림이 생기고, 사이드바 알림 수에도 표시됩니다. 모두 읽음으로 알림을 처리할 수 있습니다.
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<a href="docs/screenshots/public/admin/사용자%20입장에서%20문의%20답변%20등록됨.png"><img src="docs/screenshots/public/admin/사용자%20입장에서%20문의%20답변%20등록됨.png" alt="답변이 표시된 문의" width="100%"></a>
+<br><strong>11. 답변이 표시된 문의</strong>
+<br>회원의 문의 상세는 상태가 답변 완료로 바뀌고, 관리자 답변 내용과 등록 시각이 함께 표시됩니다.
+</td>
+<td width="50%" valign="top"></td>
+</tr>
 </table>
 
 ## 기술 스택
