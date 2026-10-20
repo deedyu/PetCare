@@ -52,3 +52,6 @@ petcare-data/
 
 # 초대 코드가 보이는 원본. README는 docs/screenshots/public/ 를 사용한다.
 docs/screenshots/user/내 가족 내부.png
+
+# 계정이 보이는 관리자 원본. README는 docs/screenshots/public/admin/ 를 사용한다.
+docs/screenshots/admin/
