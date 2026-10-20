@@ -1,32 +1,94 @@
 # PetCare
 
-반려동물 일정, 건강 기록, 가족 공유를 한 계정에서 보는 웹 서비스입니다. 화면은 Thymeleaf로 그리고, 같은 서버에 JSON API가 있습니다.
+반려동물의 일정과 건강 기록을 가족 구성원과 함께 관리하는 웹 서비스입니다.
 
-이 저장소는 수업에서 진행한 Docker와 Kubernetes 실습 결과도 함께 담습니다. 아래 배포 수치는 로컬 Docker Desktop에서 실제로 확인한 값입니다.
+## 프로젝트 개요
 
-## 개발 목적
+반려동물을 키우는 가정에서는 약 먹일 시간, 병원 예약, 체중 변화가 가족 메신저와 개인 메모에 흩어지기 쉽습니다. PetCare는 이 기록을 한 계정에 모으고, 초대한 가족만 같은 반려동물을 볼 수 있게 만들었습니다.
 
-반려동물의 반복 일정과 건강 기록을 가족 구성원과 나누되, 계정과 비밀번호는 소스 코드에 남기지 않는 것이 목표입니다. 컨테이너로 포장한 뒤 Docker Hub에 올리고, Kubernetes에서 장애 복구, 수동 확장, 무중단 교체, CPU 기준 자동 확장을 단계별로 확인했습니다.
+서버는 Kotlin과 Spring Boot로 작성했습니다. 화면은 Thymeleaf로 그리고, 같은 애플리케이션에 JSON API가 있습니다. 데이터는 MySQL에 저장합니다. 이후 같은 애플리케이션을 Docker 이미지로 만들고, Kubernetes에서 장애 복구와 확장을 확인했습니다.
 
 ## 주요 기능
 
-| 경로 | 내용 |
+| 기능 | 사용자가 하는 일 |
 | --- | --- |
-| `/` | 오늘 일정, 공지, 안 읽은 알림 수 |
-| `/calendar` | 월·주·일 달력과 날짜별 완료 |
-| `/pets` | 반려동물 등록·수정. 프로필은 사진, 이모지, 이름 첫 글자 중 하나 |
-| `/pets/{id}/tasks` | 일정. 반복은 없음, 매일, 매주, 매월, 평일 |
-| `/pets/{id}/health` | 건강 기록과 체중 그래프 |
-| `/family` | 가족 생성, 초대 코드, 반려동물 공유 |
-| `/inquiries`, `/notifications` | 문의와 앱 안 알림 |
-| `/mypage` | 표시 이름 수정, 비밀번호 변경, 계정 탈퇴 |
-| `/admin` | 관리자 전용. 회원 상태, 공지, 문의 답변 |
+| 홈 | 오늘 할 일과 중요 일정을 먼저 확인한다 |
+| 캘린더 | 월·주·일 단위로 일정을 찾고 추가한다 |
+| 반려동물 | 프로필을 등록하고 일정·건강 기록으로 들어간다 |
+| 가족 | 가족을 만들고 초대 코드로 구성원을 받는다 |
+| 공유 | 소유한 반려동물을 가족에게 공유한다 |
+| 건강 기록 | 체중, 예방접종, 병원 방문, 복용 약을 남긴다 |
+| 계정 | 이름과 비밀번호를 바꾸고, 복구 코드를 다시 발급한다 |
 
-로그인에 성공하면 회원은 `/`, 관리자는 `/admin`으로 이동합니다. 같은 아이디로 15분 안에 5번 실패하면 15분 동안 로그인만 막습니다. 계정은 지우지 않습니다. 새 비밀번호는 영문과 숫자를 포함한 8자 이상입니다.
+로그인에 성공하면 회원은 홈으로, 관리자는 관리 화면으로 이동합니다. 같은 아이디로 15분 안에 5번 실패하면 15분 동안 로그인만 막습니다. 계정은 그때 지우지 않습니다.
 
-세션 쿠키는 `HttpOnly`, `SameSite=Lax`입니다. 로컬 HTTP에서는 `Secure`를 끄고, HTTPS일 때만 켭니다. 화면을 연 채 30분 동안 사용하지 않으면 로그아웃합니다. 로그인 유지 쿠키는 해시만 데이터베이스에 저장합니다.
+## 실제 서비스 화면
 
-사진은 JPG, PNG, WebP를 받고 최대 5MB입니다. 서버가 이미지를 다시 연 뒤 JPEG로 저장하고, 데이터베이스에는 파일 이름만 남깁니다.
+아래 이미지는 테스트 계정으로 연 화면입니다.
+
+### 01. 홈 대시보드
+
+로그인 직후 오늘 해야 할 일을 숫자로 요약합니다. 오늘 일정, 예정 일정, 완료 일정, 전체 일정을 나란히 보여 주고, 그 아래에서 오늘 할 일과 이미 끝낸 일을 구분합니다. 오른쪽에는 중요도가 표시된 일정이 모여 있어, 달력을 열기 전에 우선순위를 볼 수 있습니다.
+
+화면 아래에는 등록된 반려동물이 카드로 나옵니다. 카드의 일정과 건강 기록 버튼으로 해당 반려동물 페이지에 바로 이동합니다.
+
+![홈 대시보드](docs/screenshots/user/홈.png)
+
+### 02. 캘린더
+
+일정은 월, 주, 일 단위로 바꿉니다. 날짜를 누르면 그 날짜의 일정이 아래에 나오고, 반려동물과 카테고리로 목록을 줄일 수 있습니다. 일정 추가 버튼으로 새 일정을 등록합니다. 반복은 없음, 매일, 매주, 매월, 평일을 지원합니다.
+
+![캘린더](docs/screenshots/user/캘린더.png)
+
+### 03. 반려동물 관리
+
+등록된 반려동물은 이름, 종류, 나이가 보이는 카드로 관리합니다. 카드에서 일정과 건강 기록으로 들어가고, 정보를 수정하거나 삭제합니다. 삭제는 그 반려동물의 소유자만 할 수 있습니다.
+
+![반려동물 관리](docs/screenshots/user/반려동물.png)
+
+### 04. 가족 관리
+
+가족은 이름과 설명을 입력해 만듭니다. 이미 속한 가족은 위쪽 목록에 나오고, 다른 가족의 초대 코드를 입력하면 그 가족에 참여합니다. 코드는 이 화면에서 새로 만들지 않고, 가족 상세 화면에서 발급합니다.
+
+![가족 관리](docs/screenshots/user/가족.png)
+
+### 05. 가족 상세 및 공유
+
+가족 안에서는 구성원과 소유자를 구분합니다. 소유자는 초대 코드를 만들고, 자신이 등록한 반려동물을 가족에게 공유합니다. 공유하기 전에는 가족이 그 반려동물의 기록에 들어가지 못합니다. 아래쪽 최근 활동에는 가족 생성과 초대 코드 발급 같은 변경이 시간 순으로 남습니다.
+
+![가족 상세](docs/screenshots/public/내%20가족%20내부.png)
+
+### 06. 반려동물 등록
+
+반려동물 관리 화면의 등록 버튼을 누르면 이 양식이 열립니다. 프로필은 사진, 이모지, 이름 첫 글자 중 하나만 고릅니다. 사진은 JPG, PNG, WebP를 받으며 최대 5MB입니다. 서버는 파일을 다시 읽은 뒤 JPEG로 저장하고, 데이터베이스에는 파일 이름만 남깁니다. 이름, 종류, 나이를 입력한 뒤 등록하면 03번 카드 목록에 추가됩니다.
+
+![반려동물 등록](docs/screenshots/user/반려동물%20관리%20등록.png)
+
+### 07. 건강 기록 — 체중 관리
+
+건강 기록은 반려동물마다 따로 봅니다. 체중 탭에서는 날짜별 체중을 그래프로 이어서 보여주고, 각 기록은 수정하거나 삭제할 수 있습니다. 위쪽에는 다가오는 예방접종 일정이 함께 표시되어, 체중을 보는 동안 다음 접종 날짜를 놓치지 않게 합니다.
+
+![건강 기록 체중](docs/screenshots/user/건강기록.png)
+
+### 08. 건강 기록 — 의료 관리
+
+같은 페이지에서 예방접종, 병원 방문, 복용 약을 나눠 기록합니다. 접종은 이름과 다음 예정일, 병원 방문은 진단과 메모, 복용 약은 약 이름과 복용 메모를 남깁니다. 각 항목은 체중 기록과 같이 수정과 삭제가 가능합니다.
+
+![건강 기록 의료](docs/screenshots/user/건강기록2.png)
+
+### 09. 마이페이지 — 계정 관리
+
+아이디는 가입 후 바뀌지 않고, 화면에 표시되는 이름만 수정합니다. 비밀번호를 바꿀 때는 현재 비밀번호를 먼저 확인합니다. 새 비밀번호는 영문과 숫자를 포함한 8자 이상이어야 하며, 확인 입력과 같아야 저장됩니다.
+
+![마이페이지 계정](docs/screenshots/user/마이페이지.png)
+
+### 10. 마이페이지 — 계정 보안
+
+비밀번호를 잊었을 때를 위해 복구 코드를 다시 발급할 수 있습니다. 재발급하면 이전 코드는 바로 사용할 수 없습니다. 코드 값은 화면에 한 번 보여 주고, 데이터베이스에는 해시만 저장합니다.
+
+회원 탈퇴는 현재 비밀번호와 확인 문구를 모두 입력해야 진행됩니다. 안내문에는 내가 등록한 반려동물과 그 일정, 건강 기록이 삭제된다고 적혀 있습니다. 다른 회원이 남은 가족의 소유자라면 먼저 소유자를 정리해야 하고, 다른 가족에 속한 일정과 건강 기록은 지우지 않습니다.
+
+![마이페이지 보안](docs/screenshots/user/마이페이지%20탈퇴.png)
 
 ## 기술 스택
 
@@ -41,22 +103,60 @@
 | 오케스트레이션 | Kubernetes. Docker Desktop, 서버 `v1.34.1`, 노드 `linux/arm64` |
 | 지표 | metrics-server `v0.9.0` |
 
-## 폴더 구조
+## 시스템 아키텍처
+
+브라우저 요청은 Spring Boot가 받습니다. 로그인 이후 화면은 Spring Security가 막고, 반려동물과 일정, 건강 기록은 Spring Data JPA로 MySQL에 저장합니다. 관리자 화면은 일반 회원과 역할이 다릅니다.
 
 ```text
-src/main/kotlin        애플리케이션 코드
-src/main/resources     설정, Thymeleaf, 정적 파일
-src/test               H2 테스트
-Dockerfile             멀티스테이지 이미지 빌드
-docker-compose.yml     기존 Compose. 앱 8081, MySQL 3307
-docker-compose.lab.yml 수업용 Compose. 앱 8083, MySQL 3308
-k8s/                   기존 petcare 네임스페이스 매니페스트
-k8s/lab/               수업용 petcare-lab 네임스페이스 매니페스트
-k8s/lab/examples/      Secret 예시. 값은 REPLACE_ME
-.env.example           환경 변수 이름만 있는 예제
+브라우저
+  └─ Spring Boot
+       ├─ Thymeleaf 화면
+       ├─ JSON API
+       ├─ Spring Security
+       └─ Spring Data JPA
+            └─ MySQL 8
 ```
 
-## 로컬 실행
+컨테이너로 실행할 때는 앱과 MySQL을 분리합니다. 수업용 Kubernetes에서는 앱이 `petcare-lab` 네임스페이스의 MySQL Service로만 접속합니다.
+
+```text
+petcare-lab
+  petcare-service ── petcare-app Deployment
+                         └─ mysql Service ── mysql Deployment
+                                               └─ PVC
+  petcare-lab-hpa ── petcare-app의 CPU 사용량
+```
+
+## 핵심 구현
+
+세션 쿠키는 `HttpOnly`, `SameSite=Lax`입니다. 로컬 HTTP에서는 `Secure`를 끄고, HTTPS일 때만 켭니다. 화면을 연 채 30분 동안 사용하지 않으면 로그아웃합니다. 로그인 유지 토큰은 원문을 저장하지 않고 해시만 데이터베이스에 둡니다.
+
+프로필 사진은 업로드 직후 이미지로 다시 열어 손상된 파일을 거르고, JPEG로 다시 인코딩합니다. 조회는 그 반려동물에 접근할 수 있는 가족까지 허용하고, 수정과 삭제는 소유자로 제한합니다.
+
+스키마는 `ddl-auto=update`로 맞춥니다. 없는 테이블과 컬럼은 추가하고, 기존 행은 지우지 않습니다. API와 테이블 관계는 [docs/api.md](docs/api.md), [docs/erd.md](docs/erd.md)에 정리했습니다.
+
+## Docker 및 Kubernetes 실습
+
+애플리케이션을 이미지로 빌드한 뒤 Docker Hub 공개 저장소 [jeesyu/petcare](https://hub.docker.com/r/jeesyu/petcare)에 올렸습니다. 수업용 Compose는 앱 `8083`, MySQL `3308`로 기존 환경과 포트를 나누었습니다. Kubernetes 수업은 별도 네임스페이스 `petcare-lab`에서 진행했습니다.
+
+| 실습 | 확인한 결과 |
+| --- | --- |
+| Self-healing | Pod 삭제 후 18초 만에 READY 1/1 |
+| 수동 확장 | 복제본 1개에서 2개. 기존 Pod는 유지 |
+| Rolling Update | `lab-v2`로 교체하는 데 37.3초 |
+| HPA | CPU 50% 기준으로 2개에서 3개, 약 6분 뒤 다시 2개 |
+
+Pod 이름, 이미지 digest, HPA 부하 조건과 metrics-server 설정은 [docs/deployment-lab.md](docs/deployment-lab.md)에 그대로 두었습니다.
+
+## 문제 해결
+
+수업 환경을 기존 로컬 실행과 겹치지 않게 나누는 것이 먼저였습니다. 기존 Kubernetes Service는 `8081`, 수업 Compose는 `8083`, 수업 Kubernetes는 `8084`를 사용합니다. MySQL도 기존 볼륨과 수업용 볼륨, 수업용 PVC를 서로 다른 이름으로 분리했습니다.
+
+Rolling Update 중에는 새 Pod가 준비되기 전에 기존 Pod를 지우지 않도록 `maxUnavailable`을 낮췄습니다. 복제본 2개에서는 새 Pod를 1개 먼저 띄운 뒤 교체했습니다.
+
+HPA는 사용량을 읽지 못하는 상태에서 시작하지 않았습니다. Docker Desktop의 kubelet 인증서에 노드 IP가 없어 metrics-server가 실패했고, 이 로컬 클러스터에서만 `--kubelet-insecure-tls`를 추가한 뒤에 부하 테스트를 진행했습니다. 통신 암호화는 유지되고, 인증서가 클러스터 CA와 주소에 맞는지만 확인하지 않습니다.
+
+## 실행 방법
 
 Java 17과 MySQL 8이 필요합니다. 기본 포트는 `8081`이고, 데이터베이스 이름은 `petcare`입니다.
 
@@ -68,94 +168,20 @@ cp .env.example .env
 
 `.env`에는 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, `PETCARE_ADMIN_INITIAL_PASSWORD`를 채웁니다. 이 파일은 Git에 올리지 않습니다. 값이 비어 있으면 서버는 비밀번호를 출력하지 않고, 빠진 변수 이름만 알려 준 뒤 멈춥니다.
 
-스키마는 `ddl-auto=update`로 맞춥니다. 없는 테이블과 컬럼은 추가하고, 기존 행은 지우지 않습니다.
-
-## Docker
-
-`Dockerfile`은 두 단계입니다. `gradle:jdk17`에서 테스트를 제외하고 JAR을 만들고, `eclipse-temurin:17-jre-jammy`에서 그 JAR만 실행합니다. 컨테이너 포트는 `8081`입니다. `.dockerignore`가 `.env`와 테스트 소스를 이미지 밖으로 둡니다.
-
-로컬 태그 `petcare:lab`의 이미지 ID는 `sha256:ddd77632153463e0415bcdff9239d55dfa22e4c2b4cc9a7d1b13025614ccaa93`입니다.
-
-## Docker Compose
-
-기존 `docker-compose.yml`은 수정하지 않았습니다. 수업은 별도 파일로 실행합니다.
+수업용 컨테이너는 아래 명령으로 실행합니다. `.env.lab`도 Git에 포함하지 않습니다.
 
 ```bash
 docker compose --env-file .env.lab -f docker-compose.lab.yml up -d
 ```
 
-| 컨테이너 | 호스트 포트 | 역할 |
-| --- | --- | --- |
-| `petcare-lab-mysql` | `3308` | MySQL 8.0, 데이터베이스 `petcare_lab` |
-| `petcare-lab-app` | `8083` | `petcare:lab` |
+Kubernetes 매니페스트는 `k8s/lab/`에 있습니다. Secret 예시의 값은 `REPLACE_ME`이며, 실제 Secret은 클러스터에만 만들었습니다.
 
-데이터는 이름 있는 볼륨 `petcare_lab_mysql_data`에 있습니다. 기존 볼륨 `petcare_mysql_data`와는 다릅니다. 비밀번호는 Git에 없는 `.env.lab`에서 읽습니다. MySQL이 healthy가 된 뒤에 앱이 시작됩니다.
+## 기술적 한계와 개선 지점
 
-## Docker Hub
+로그인 세션은 Pod 메모리에 있습니다. Pod가 바뀌면 그 브라우저 세션은 사라집니다. `sessionAffinity: ClientIP`는 같은 컴퓨터의 요청을 한 Pod로 보내지만, 그 Pod가 교체되면 다시 로그인해야 합니다. 여러 복제본에서 세션을 유지하려면 세션 저장소를 Pod 밖으로 옮겨야 합니다.
 
-공개 저장소는 [jeesyu/petcare](https://hub.docker.com/r/jeesyu/petcare)입니다.
+사진 파일도 Pod 안 디스크에 있고 공유 PVC가 없습니다. Pod가 사라지면 그 사진 파일은 사라지고, 데이터베이스에는 파일 이름만 남습니다. 업로드한 사진을 유지하려면 사진 디렉터리를 공유 볼륨에 두어야 합니다.
 
-| 태그 | 구분 |
-| --- | --- |
-| `lab` | 첫 업로드 이미지. 로컬 ID `sha256:ddd776321534...` |
-| `lab-v2` | 같은 애플리케이션에 빌드 라벨만 추가한 이미지 |
+메일 발송과 기기 푸시는 없습니다. 알림은 앱 안 목록입니다. 스키마 변경은 운영용 마이그레이션 도구 없이 `ddl-auto=update`에 의존합니다. 이 값을 `create`나 `create-drop`으로 바꾸면 기존 행이 사라질 수 있습니다.
 
-`lab-v2`는 소스와 화면을 바꾸지 않고 `docker build --label petcare.image.version=lab-v2`로 만들었습니다. 로컬 이미지 ID는 `sha256:c8a1f87e41aacfe39ca4a3c7fbf00ff7a408441d45280a84a374465e5358110f`입니다.
-
-Docker Hub에서 따로 조회한 태그 digest도 같은 인덱스 값입니다. 그 안의 `linux/arm64` 매니페스트 digest는 `sha256:9abf11d0315cb152d038aa569c55018d17bc70dac52d34a2af93740f61c462a1`로, 인덱스 digest와 다릅니다. 이미지 ID와 레지스트리 digest는 항상 같은 값으로 보지 않았습니다.
-
-## Kubernetes
-
-수업용 클러스터는 기존 `petcare` 네임스페이스와 분리된 `petcare-lab`입니다. 기존 네임스페이스의 MySQL, PVC, 복제본 0인 앱 Deployment는 유지했습니다.
-
-```text
-Namespace petcare-lab
-  ConfigMap petcare-lab-config     주소, DB 이름 petcare_lab, 포트
-  Secret    앱 계정과 MySQL 비밀번호. Git에는 예시만 있음
-  PVC       petcare-lab-mysql-pvc  1Gi, hostpath
-  Deployment mysql                 복제본 1, mysql:8.0
-  Service   mysql                  ClusterIP 3306
-  Deployment petcare-app           jeesyu/petcare:lab-v2
-  Service   petcare-service        LoadBalancer, 호스트 8084 → 컨테이너 8081
-  HPA       petcare-lab-hpa        CPU 50%, 최소 2, 최대 3
-```
-
-앱은 MySQL Service 이름 `mysql`로 접속합니다. 이 이름은 `petcare-lab` 안에서만 이 실습용 데이터베이스를 가리킵니다. 준비 검사는 `GET /`입니다. 로그인 전에는 302가 돌아오고, Kubernetes는 그 응답을 준비 완료로 봅니다.
-
-`k8s/lab/petcare-deployment.yaml`의 복제본과 이미지는 실습이 끝난 상태인 복제본 2, `jeesyu/petcare:lab-v2`로 적어 두었습니다. 이 문서 작업에서는 그 파일을 클러스터에 다시 적용하지 않았습니다.
-
-## 실습 결과
-
-모두 `docker-desktop` context, 네임스페이스 `petcare-lab`에서 확인했습니다.
-
-### Self-healing
-
-Deployment가 유지하려는 PetCare Pod는 1개였습니다. Pod `petcare-app-5596fbccd5-xrgbq`를 삭제한 뒤, 같은 ReplicaSet이 `petcare-app-5596fbccd5-j8q5v`를 만들었습니다. 삭제 시작부터 READY 1/1까지 **18초**였습니다. 회원과 반려동물 `실습별`은 MySQL 볼륨에 남아 있었습니다. 로그인 세션은 삭제된 Pod 메모리에 있었기 때문에 다시 로그인해야 했습니다.
-
-### 수동 확장
-
-`kubectl scale deployment/petcare-app --replicas=2`로 1개에서 2개로 늘렸습니다. 기존 Pod는 지우지 않았고, `petcare-app-5596fbccd5-lq72g`가 추가되었습니다. 두 Pod의 데이터베이스 주소는 같았고 Service Endpoint는 2개였습니다. MySQL 복제본은 1개로 두었습니다.
-
-### Rolling Update
-
-`maxSurge 25%`, `maxUnavailable 25%`입니다. 복제본 2개에서는 새 Pod를 1개까지 먼저 만들고, 그 Pod가 준비되기 전에는 기존 Pod를 지우지 않습니다.
-
-`kubectl set image`로 `jeesyu/petcare:lab-v2`로 바꾼 뒤 **37.3초** 만에 새 Pod 2개가 READY가 되었습니다. 순서는 새 Pod 1개 추가, 준비 완료, 기존 Pod 1개 종료, 두 번째 새 Pod 준비, 남은 기존 Pod 종료였습니다. 회원과 `실습별`은 유지됐습니다. Rollback은 하지 않았습니다.
-
-### HPA
-
-metrics-server `v0.9.0`을 설치한 뒤 `petcare-lab-hpa`를 만들었습니다. CPU request `100m`의 50%가 목표이므로, Pod 평균 사용량이 `50m`을 넘으면 늘립니다. 최소 2개, 최대 3개입니다.
-
-읽기 전용 `GET /login`을 Pod마다 동시 10개로 보냈습니다. 약 21초 뒤 앱 Pod CPU가 각각 약 `900m`까지 올라 limit에 가까워져 부하를 멈췄고, 2차 부하는 실행하지 않았습니다. HPA 대상 사용률은 `914%/50%`까지 표시됐습니다.
-
-약 1분 안에 Pod가 2개에서 3개로 늘고 READY 3/3이 되었습니다. 부하가 끝난 뒤 약 6분 후 추가 Pod만 종료되고 다시 2개가 되었습니다. HPA는 최근 5분의 높은 사용량을 기억한 뒤 최소 개수로 줄입니다.
-
-## 문제 해결과 기술적 한계
-
-- 포트가 겹치지 않게 나누었습니다. 기존 Kubernetes는 `8081`, 로컬 실행은 설정에 따라 `8081`, 수업 Compose는 `8083`, 수업 Kubernetes는 `8084`입니다.
-- 수업용 MySQL 볼륨과 PVC는 기존 데이터와 다른 이름입니다. 앱 Pod를 지워도 데이터베이스 행은 남습니다.
-- 로그인 세션은 Pod 메모리에 있습니다. Pod가 바뀌면 그 세션은 사라집니다. Service의 `sessionAffinity: ClientIP`는 같은 컴퓨터의 요청을 한 Pod로 붙이려 하지만, 그 Pod가 교체되면 다시 로그인해야 합니다.
-- 사진 파일은 Pod 안 디스크에 있고 공유 PVC가 없습니다. Pod가 사라지면 그 사진 파일도 사라집니다. 데이터베이스에는 파일 이름만 있습니다. `실습별`은 이름 첫 글자라 사진 파일이 없었습니다.
-- Docker Desktop kubelet 인증서에 노드 IP가 없어 metrics-server가 사용량을 읽지 못했습니다. 이 로컬 실습에서만 `--kubelet-insecure-tls`를 추가했습니다. 통신 암호화는 유지되고, 인증서가 클러스터 CA와 주소에 맞는지만 확인하지 않습니다. 인터넷에 공개된 클러스터용 설정이 아닙니다.
-- 메일 발송과 기기 푸시는 없습니다. 알림은 앱 안 목록입니다.
-- 운영 마이그레이션 도구는 넣지 않았습니다. `ddl-auto=update`를 `create`나 `create-drop`으로 바꾸면 기존 행이 사라질 수 있습니다.
+metrics-server의 `--kubelet-insecure-tls`는 Docker Desktop에서 진행한 이번 실습에만 해당합니다. 공개된 클러스터에 그대로 적용할 설정이 아닙니다.
