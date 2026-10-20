@@ -126,7 +126,15 @@
 <br><strong>05. 문의 관리</strong>
 <br>제목, 작성자, 접수일, 처리 상태를 보고 전체·접수·처리 중·답변 완료로 거릅니다. 제목을 누르면 상태를 저장하고 답변을 등록하는 화면으로 이동합니다. 목록에서 문의를 삭제하는 기능은 없습니다.
 </td>
-<td width="50%" valign="top"></td>
+<td width="50%" valign="top">
+<a href="docs/screenshots/public/admin/공지사항%20등록.png"><img src="docs/screenshots/public/admin/공지사항%20등록.png" alt="등록된 공지" width="100%"></a>
+<br><strong>06. 등록된 공지</strong>
+<br>공지를 등록하면 목록에 작성자, 작성일, 고정 여부가 표시됩니다. 고정된 공지는 고정을 해제할 수 있고, 일반 공지는 고정하거나 삭제할 수 있습니다. 등록한 제목과 내용을 수정하는 기능은 없습니다.
+<br><br>
+<a href="docs/screenshots/public/admin/사용자%20입장%20공지사항.png"><img src="docs/screenshots/public/admin/사용자%20입장%20공지사항.png" alt="사용자 홈의 공지" width="100%"></a>
+<br><strong>사용자 홈에 보이는 공지</strong>
+<br>회원 홈의 공지 영역에 같은 글이 나옵니다. 고정한 공지는 고정 표시와 함께 위에 나오고, 일반 공지는 그 아래에 제목과 내용이 표시됩니다.
+</td>
 </tr>
 </table>
 
