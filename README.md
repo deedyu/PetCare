@@ -136,6 +136,18 @@
 <br>회원 홈의 공지 영역에 같은 글이 나옵니다. 고정한 공지는 고정 표시와 함께 위에 나오고, 일반 공지는 그 아래에 제목과 내용이 표시됩니다.
 </td>
 </tr>
+<tr>
+<td width="50%" valign="top">
+<a href="docs/screenshots/public/admin/사용자%20문의%20등록.png"><img src="docs/screenshots/public/admin/사용자%20문의%20등록.png" alt="사용자가 등록한 문의" width="100%"></a>
+<br><strong>07. 사용자가 등록한 문의</strong>
+<br>회원이 남긴 문의는 상세 화면에서 접수 상태, 제목, 내용, 등록 시각을 보여 줍니다. 답변이 없으면 비어 있다고 안내하고, 답변이 달리면 이 화면과 알림에서 확인할 수 있습니다.
+</td>
+<td width="50%" valign="top">
+<a href="docs/screenshots/public/admin/문의%20등록%20답변.png"><img src="docs/screenshots/public/admin/문의%20등록%20답변.png" alt="관리자 문의 답변" width="100%"></a>
+<br><strong>08. 관리자 문의 답변</strong>
+<br>관리자는 같은 문의의 작성자, 내용, 접수 상태를 보고 상태를 접수·처리 중·답변 완료로 저장합니다. 답변을 입력해 등록하며, 등록 전에는 아직 답변이 없다고 표시됩니다.
+</td>
+</tr>
 </table>
 
 ## 기술 스택
